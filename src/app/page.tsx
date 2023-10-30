@@ -1,95 +1,147 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+import { Extraction, FFmpegWrapper } from "@/FFmpegWrapper";
+import { audioFormatToFileType } from "@/utils";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 export default function Home() {
+  const ffmpeg = useRef<FFmpegWrapper | null>(null);
+  const [ffmpegLoaded, setFFmpegLoaded] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const extraction = useRef<Extraction | null>(null);
+  const [extractionReady, setExtractionReady] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [outputFormat, setOutputFormat] = useState<string | null>(null);
+
+  useEffect(() => {
+    const f = async () => {
+      ffmpeg.current = await FFmpegWrapper.create();
+      setFFmpegLoaded(true);
+      console.log("FFmpeg loaded");
+    };
+    f();
+  }, []);
+
+  useEffect(() => {
+    if (!ffmpegLoaded) return;
+    if (!uploadFile) return;
+    const f = async () => {
+      if (extraction.current) {
+        await extraction.current.delete();
+        console.log("Extraction deleted");
+        setExtractionReady(false);
+      }
+      extraction.current = await Extraction.create(
+        ffmpeg.current!,
+        uploadFile
+      );
+      setExtractionReady(true);
+      console.log("Extraction created");
+      setUploadFile(null);
+    };
+    f();
+  }, [ffmpegLoaded, uploadFile]);
+
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length === 1) {
+      const file = e.target.files[0];
+      setUploadFile(file);
+    } else {
+      setUploadFile(null);
+      console.log("Here", extraction.current)
+      if (extraction.current) {
+        await extraction.current.delete();
+        extraction.current = null;
+        setExtractionReady(false);
+      }
+      setProcessing(false);
+    }
+  };
+
+  const extractAndDownloadAudio = async () => {
+    if (extraction.current) {
+      setProcessing(true);
+      const namedPayload = await extraction.current.extractAudio(
+        outputFormat
+      );
+      const blob = new Blob([namedPayload.payload], {
+        type: audioFormatToFileType(namedPayload.format),
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = namedPayload.name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setProcessing(false);
+    } else {
+      console.error("extraction is not ready yet");
+    }
+  };
+
+  const outputFormatOptions = [
+    "default",
+    "mp3",
+    "ogg",
+    "wav",
+    "aac",
+    "flac",
+    "m4a",
+    "opus",
+    "ac3"
+  ];
+  const onOutputFormatChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const format = e.target.value;
+    if (format === "default") {
+      setOutputFormat(null);
+    } else {
+      setOutputFormat(format);
+    }
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+    <header className="container">
+      <h1>Audio Extractor</h1>
+      <p>For a given video file, extracts the audio for you.</p>
+      <p>Default is the fastest 🚀</p>
+    </header>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ width: "20em", height: "10em" }}>
+          <input
+            type="file"
+            id="upload"
+            name="Upload"
+            accept=".mp4, .mkv, .webm"
+            onChange={handleFileUpload}
+          />
+
+          <div style={{display: "flex", flexDirection: "row", gap: "1em"}}>
+            <select id='output-format' defaultValue={"default"} onChange={onOutputFormatChange}>
+              {outputFormatOptions.map((option, index) => (
+                <option key={index} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            <label htmlFor="output-format">Output Format</label>
+          </div>
+
+          <button onClick={extractAndDownloadAudio} aria-busy={processing} disabled={!extractionReady} >
+            Extract
+          </button>
         </div>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    </>
+  );
 }
