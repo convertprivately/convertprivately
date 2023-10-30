@@ -1,23 +1,26 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-// import './globals.css'
-import '@picocss/pico'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "@picocss/pico";
+import { Header } from "@/Header";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Alphy Tools',
-  description: 'Tools by Alphy',
-}
+  title: "QuickLodge",
+  description: "Tools by Alphy",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Header />
+        {children}
+      </body>
     </html>
-  )
+  );
 }
