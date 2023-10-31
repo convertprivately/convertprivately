@@ -1,10 +1,9 @@
-// Write a class that has a async init method
-
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Mutex } from "async-mutex";
 import path from "path";
 import { changeExtension } from "./utils";
-// import path from "path";
+
+export type ProgressCallback = ({progress, time}: {progress: number, time: number}) => void;
 
 export class FFmpegWrapper {
   private ffmpeg: FFmpeg = new FFmpeg();
@@ -67,12 +66,25 @@ export class FFmpegWrapper {
     });
   }
 
+  /**
+   * Extracts the audio from a given file.
+   *
+   * @param {string} filename - The name of the file from which to extract audio.
+   * @param {ProgressCallback} [progressCallback] - Optional callback function to handle progress updates. Time is in microseconds, progress is between [0,1]
+   * @returns {Promise<NamedPayload>} A promise that resolves to an object containing the name of the output file, the payload as a Uint8Array, and the format of the audio.
+   *
+   * @throws Will throw an error if the extraction fails.
+   */
   public async extractAudio(
     filename: string,
+    progressCallback?: ProgressCallback
   ): Promise<NamedPayload> {
+    if (progressCallback) {
+      this.ffmpeg.on("progress", progressCallback);
+    }
+
     const format = await this.audioFormat(filename);
     const outputFilename = changeExtension(filename, format);
-
     return await this.mutex.runExclusive(async () => {
       this.log("COMMAND", "Extracting audio from " + filename);
       await this.ffmpeg.exec([
@@ -86,21 +98,37 @@ export class FFmpegWrapper {
       try {
         const payload = await this.ffmpeg.readFile(outputFilename);
         this.log("RESULT", "Extracted audio from " + filename);
-        return { name: outputFilename, payload: payload as Uint8Array, format: format! };
+        return {
+          name: outputFilename,
+          payload: payload as Uint8Array,
+          format: format!,
+        };
       } catch (e) {
         throw new Error("Failed to extract audio from " + filename + ": " + e);
+      } finally {
+        if (progressCallback) {
+          this.ffmpeg.off("progress", progressCallback);
+        }
       }
     });
   }
 
   public async extractConvertAudio(
     filename: string,
-    format: string
+    format: string,
+    progressCallback?: ProgressCallback
   ): Promise<NamedPayload> {
+    if (progressCallback) {
+      this.ffmpeg.on("progress", progressCallback);
+    }
+
     const outputFilename = changeExtension(filename, format);
 
     return await this.mutex.runExclusive(async () => {
-      this.log("COMMAND", "Extracting audio from " + filename + " and converting to " + format);
+      this.log(
+        "COMMAND",
+        "Extracting audio from " + filename + " and converting to " + format
+      );
       await this.ffmpeg.exec([
         "-i",
         filename,
@@ -113,9 +141,17 @@ export class FFmpegWrapper {
       try {
         const payload = await this.ffmpeg.readFile(outputFilename);
         this.log("RESULT", "Extracted audio from " + filename);
-        return { name: outputFilename, payload: payload as Uint8Array, format: format! };
+        return {
+          name: outputFilename,
+          payload: payload as Uint8Array,
+          format: format!,
+        };
       } catch (e) {
         throw new Error("Failed to extract audio from " + filename + ": " + e);
+      } finally {
+        if (progressCallback) {
+          this.ffmpeg.off("progress", progressCallback);
+        }
       }
     });
   }
@@ -124,7 +160,7 @@ export class FFmpegWrapper {
 interface NamedPayload {
   name: string;
   payload: Uint8Array;
-  format: string
+  format: string;
 }
 
 export class Extraction {
@@ -168,12 +204,12 @@ export class Extraction {
     return await this.ffmpeg.audioFormat(this.input);
   }
 
-  public async extractAudio(format: string | null): Promise<NamedPayload> {
+  public async extractAudio(format: string | null, progressCallback?: ProgressCallback): Promise<NamedPayload> {
     let namedPayload: NamedPayload;
     if (format) {
-      namedPayload = await this.ffmpeg.extractConvertAudio(this.input, format);
+      namedPayload = await this.ffmpeg.extractConvertAudio(this.input, format, progressCallback);
     } else {
-      namedPayload = await this.ffmpeg.extractAudio(this.input);
+      namedPayload = await this.ffmpeg.extractAudio(this.input, progressCallback);
     }
     this.outputs.push(namedPayload.name);
     return namedPayload;

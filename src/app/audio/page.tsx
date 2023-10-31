@@ -1,8 +1,13 @@
 "use client";
 
-import { Extraction, FFmpegWrapper } from "@/FFmpegWrapper";
-import { audioFormatToFileType } from "@/utils";
+import { Extraction, FFmpegWrapper, ProgressCallback } from "@/FFmpegWrapper";
+import { audioFormatToFileType, microsecondsToString } from "@/utils";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
+
+interface Progress {
+  progress: number;
+  microseconds: number;
+}
 
 export default function Audio() {
   const ffmpeg = useRef<FFmpegWrapper | null>(null);
@@ -10,7 +15,7 @@ export default function Audio() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const extraction = useRef<Extraction | null>(null);
   const [extractionReady, setExtractionReady] = useState(false);
-  const [processing, setProcessing] = useState(false);
+  const [progress, setProgress] = useState<Progress | null>(null);
   const [outputFormat, setOutputFormat] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,10 +36,7 @@ export default function Audio() {
         console.log("Extraction deleted");
         setExtractionReady(false);
       }
-      extraction.current = await Extraction.create(
-        ffmpeg.current!,
-        uploadFile
-      );
+      extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       setExtractionReady(true);
       console.log("Extraction created");
       setUploadFile(null);
@@ -48,21 +50,26 @@ export default function Audio() {
       setUploadFile(file);
     } else {
       setUploadFile(null);
-      console.log("Here", extraction.current)
+      console.log("Here", extraction.current);
       if (extraction.current) {
         await extraction.current.delete();
         extraction.current = null;
         setExtractionReady(false);
       }
-      setProcessing(false);
+      setProgress(null);
     }
+  };
+
+  const progressCallback: ProgressCallback = ({ progress, time }) => {
+    setProgress({ progress, microseconds: time });
   };
 
   const extractAndDownloadAudio = async () => {
     if (extraction.current) {
-      setProcessing(true);
+      setProgress({ progress: 0, microseconds: 0 });
       const namedPayload = await extraction.current.extractAudio(
-        outputFormat
+        outputFormat,
+        progressCallback
       );
       const blob = new Blob([namedPayload.payload], {
         type: audioFormatToFileType(namedPayload.format),
@@ -76,7 +83,7 @@ export default function Audio() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      setProcessing(false);
+      setProgress(null);
     } else {
       console.error("extraction is not ready yet");
     }
@@ -91,7 +98,7 @@ export default function Audio() {
     "flac",
     "m4a",
     "opus",
-    "ac3"
+    "ac3",
   ];
   const onOutputFormatChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const format = e.target.value;
@@ -104,9 +111,9 @@ export default function Audio() {
 
   return (
     <>
-    <div className="container" style={{padding: "3em"}}>
-      <p>For any video file given, extracts the audio for you.</p>
-    </div>
+      <div className="container" style={{ padding: "3em" }}>
+        <p>For any video file given, extracts the audio for you.</p>
+      </div>
       <div
         style={{
           display: "flex",
@@ -124,8 +131,12 @@ export default function Audio() {
             onChange={handleFileUpload}
           />
 
-          <div style={{display: "flex", flexDirection: "row", gap: "1em"}}>
-            <select id='output-format' defaultValue={"default"} onChange={onOutputFormatChange}>
+          <div style={{ display: "flex", flexDirection: "row", gap: "1em" }}>
+            <select
+              id="output-format"
+              defaultValue={"default"}
+              onChange={onOutputFormatChange}
+            >
               {outputFormatOptions.map((option, index) => (
                 <option key={index} value={option}>
                   {option}
@@ -135,9 +146,22 @@ export default function Audio() {
             <label htmlFor="output-format">Output Format</label>
           </div>
 
-          <button onClick={extractAndDownloadAudio} aria-busy={processing} disabled={!extractionReady} >
+          <button
+            onClick={extractAndDownloadAudio}
+            aria-busy={progress !== null}
+            disabled={!extractionReady}
+          >
             Extract
           </button>
+
+          {progress && (
+            <>
+              <progress value={progress?.progress} max={1} />
+              <div style={{ display: "flex", flexDirection: "row", justifyContent: "flex-end" }}>
+                <span>{microsecondsToString(progress.microseconds)}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
