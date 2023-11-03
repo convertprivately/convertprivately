@@ -1,7 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Mutex } from "async-mutex";
 import path from "path";
-import { changeExtension } from "./utils";
+import { changeExtension, microsecondsToString } from "./utils";
 
 export type ProgressCallback = ({progress, time}: {progress: number, time: number}) => void;
 
@@ -65,86 +65,104 @@ export class FFmpegWrapper {
       return format;
     });
   }
-
+  
   /**
-   * Extracts the audio from a given file.
-   *
-   * @param {string} filename - The name of the file from which to extract audio.
-   * @param {ProgressCallback} [progressCallback] - Optional callback function to handle progress updates. Time is in microseconds, progress is between [0,1]
-   * @returns {Promise<NamedPayload>} A promise that resolves to an object containing the name of the output file, the payload as a Uint8Array, and the format of the audio.
-   *
-   * @throws Will throw an error if the extraction fails.
+   * Builds a command array for audio extraction using FFmpeg.
+   * 
+   * @param {Object} options - The options for the audio extraction command.
+   * @param {string} options.filename - The name of the input audio file.
+   * @param {number} [options.start] - The start time in microseconds for the audio extraction.
+   * @param {number} [options.end] - The end time in microseconds for the audio extraction.
+   * @param {string} [options.format] - The desired output format of the audio file, if not provided the original format is used.
+   * 
+   * @returns A promise that resolves to an object containing an array of command line arguments for FFmpeg and the outputFilename.
+   * 
+   * @example
+   * // Example with format specified, extracting a portion from 30 seconds to 1 minute as a WAV file
+   * // returns command ['-i', 'audio.mp3', '-ss', '00:00:30', '-to', '00:01:00', '-q:a', '0', '-map', 'a', 'audio.wav']
+   * buildAudioExtractionCommand({
+   *   filename: 'audio.mp3',
+   *   start: 30000000,
+   *   end: 60000000,
+   *   format: 'wav'
+   * });
+   * 
+   * @example
+   * // Example without format specified, extracting the full audio without re-encoding
+   * // returns command ['-i', 'audio.mp3', '-ss', '00:00:30', '-vn', '-acodec', 'copy', 'audio.mp3']
+   * buildAudioExtractionCommand({
+   *   filename: 'audio.mp3'
+   *   start: 30000000,
+   * });
+   * 
+   * @async
+   * @function buildAudioExtractionCommand
    */
-  public async extractAudio(
-    filename: string,
-    progressCallback?: ProgressCallback
-  ): Promise<NamedPayload> {
+  private async buildAudioExtractionCommand({
+    filename,
+    format,
+    start,
+    end,
+  }: {
+    filename: string;
+    start?: number;
+    end?: number;
+    format?: string;
+  }): Promise<{command: string[], outputFilename: string, outputFormat: string}> {
+    const command = ["-i", filename];
+    let finalFormat: string | undefined = format;
+    if (start) {
+      command.push("-ss", microsecondsToString(start));
+    }
+    if (end) {
+      command.push("-to", microsecondsToString(end));
+    }
+    if (finalFormat) {
+      command.push("-q:a", "0", "-map", "a");
+    } else {
+      command.push("-vn", "-acodec", "copy");
+      finalFormat = await this.audioFormat(filename);
+    }
+    const outputFilename = changeExtension(filename, finalFormat);
+    command.push(outputFilename);
+  
+    return {command, outputFilename, outputFormat: finalFormat};
+  } 
+
+  public async extractAudio({
+    filename,
+    format,
+    start,
+    end,
+    progressCallback,
+  }: {
+    filename: string;
+    format?: string;
+    start?: number;
+    end?: number;
+    progressCallback?: ProgressCallback;
+  }): Promise<NamedPayload> {
     if (progressCallback) {
       this.ffmpeg.on("progress", progressCallback);
     }
 
-    const format = await this.audioFormat(filename);
-    const outputFilename = changeExtension(filename, format);
-    return await this.mutex.runExclusive(async () => {
-      this.log("COMMAND", "Extracting audio from " + filename);
-      await this.ffmpeg.exec([
-        "-i",
-        filename,
-        "-vn",
-        "-acodec",
-        "copy",
-        outputFilename,
-      ]);
-      try {
-        const payload = await this.ffmpeg.readFile(outputFilename);
-        this.log("RESULT", "Extracted audio from " + filename);
-        return {
-          name: outputFilename,
-          payload: payload as Uint8Array,
-          format: format!,
-        };
-      } catch (e) {
-        throw new Error("Failed to extract audio from " + filename + ": " + e);
-      } finally {
-        if (progressCallback) {
-          this.ffmpeg.off("progress", progressCallback);
-        }
-      }
+    const {command, outputFilename, outputFormat} = await this.buildAudioExtractionCommand({
+      filename,
+      format,
+      start,
+      end,
     });
-  }
-
-  public async extractConvertAudio(
-    filename: string,
-    format: string,
-    progressCallback?: ProgressCallback
-  ): Promise<NamedPayload> {
-    if (progressCallback) {
-      this.ffmpeg.on("progress", progressCallback);
-    }
-
-    const outputFilename = changeExtension(filename, format);
 
     return await this.mutex.runExclusive(async () => {
-      this.log(
-        "COMMAND",
-        "Extracting audio from " + filename + " and converting to " + format
-      );
-      await this.ffmpeg.exec([
-        "-i",
-        filename,
-        "-q:a",
-        "0",
-        "-map",
-        "a",
-        outputFilename,
-      ]);
+      this.log("COMMAND", "Extracting audio with command " + command.join(" "));
+      await this.ffmpeg.exec(command);
       try {
         const payload = await this.ffmpeg.readFile(outputFilename);
         this.log("RESULT", "Extracted audio from " + filename);
         return {
           name: outputFilename,
           payload: payload as Uint8Array,
-          format: format!,
+          format: outputFormat,
         };
       } catch (e) {
         throw new Error("Failed to extract audio from " + filename + ": " + e);
@@ -204,14 +222,44 @@ export class Extraction {
     return await this.ffmpeg.audioFormat(this.input);
   }
 
-  public async extractAudio(format: string | null, progressCallback?: ProgressCallback): Promise<NamedPayload> {
-    let namedPayload: NamedPayload;
-    if (format) {
-      namedPayload = await this.ffmpeg.extractConvertAudio(this.input, format, progressCallback);
-    } else {
-      namedPayload = await this.ffmpeg.extractAudio(this.input, progressCallback);
-    }
-    this.outputs.push(namedPayload.name);
-    return namedPayload;
+  /**
+   * Extracts a portion of an audio file within specified start and end times or converts the entire file to a different format.
+   * It also allows conversion of the extracted segment to a specified format.
+   *
+   * @param {Object} options - Configuration options for audio extraction.
+   * @param {string} [options.format] - The desired output format of the audio segment (e.g., 'mp3', 'wav', 'ogg'). Defaults to the original format if not specified.
+   * @param {number} [options.start] - The start time in microseconds for the audio segment extraction. Omitting this starts from the beginning of the audio.
+   * @param {number} [options.end] - The end time in microseconds for the audio segment extraction. Omitting this extracts until the end of the audio.
+   * @param {ProgressCallback} [options.progressCallback] - A callback to receive progress updates on the extraction process.
+   * @returns {Promise<NamedPayload>} - A promise that resolves to an object with 'name', 'payload', and 'format' of the extracted audio.
+   * @throws {Error} - If audio extraction fails, an error is thrown.
+   *
+   * @example
+   * // Extract audio from 30 seconds (30,000,000 microseconds) to 2 minutes (120,000,000 microseconds) in 'wav' format.
+   * const segment = await extractionInstance.extractAudio({
+   *   format: 'wav',
+   *   start: 30000000,  // Start at 30 seconds
+   *   end: 120000000    // End at 2 minutes
+   * });
+   * // The 'segment' will be a 'wav' file containing the specified 1.5-minute audio portion.
+   *
+   * @example
+   * // Extract audio from the beginning of the file to 1 minute (60,000,000 microseconds) with progress updates.
+   * const oneMinuteAudio = await extractionInstance.extractAudio({
+   *   end: 60000000,  // End at 1 minute
+   *   progressCallback: ({ progress, time }) => {
+   *     console.log(`Current progress: ${progress}%, Current time: [${microsecondsToString(time)}]`);
+   *   }
+   * });
+   * // The 'oneMinuteAudio' will contain the first minute of the audio in its original format.
+   * // Progress will be logged to the console.
+   */
+  public async extractAudio(options: {
+    format?: string;
+    start?: number;
+    end?: number;
+    progressCallback?: ProgressCallback;
+  }): Promise<NamedPayload> {
+    return await this.ffmpeg.extractAudio({...options, filename: this.input});
   }
 }
