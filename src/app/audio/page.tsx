@@ -67,10 +67,10 @@ export default function Audio() {
   const extractAndDownloadAudio = async () => {
     if (extraction.current) {
       setProgress({ progress: 0, microseconds: 0 });
-      const namedPayload = await extraction.current.extractAudio(
-        outputFormat,
-        progressCallback
-      );
+      const namedPayload = await extraction.current.extractAudio({
+        format: outputFormat || undefined,
+        progressCallback,
+    });
       const blob = new Blob([namedPayload.payload], {
         type: audioFormatToFileType(namedPayload.format),
       });
