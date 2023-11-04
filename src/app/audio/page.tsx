@@ -177,14 +177,14 @@ if(progress!==null){
   
 
   return (
-    <div className={`max-w-[900px] mx-auto w-full px-10`}>
+    <div className={`max-w-[900px] mx-auto w-full px-10 lg:px-6`}>
       <p className="mb-4 text-lg   font-semibold text-white">Convert your video file to MP3, OGG, WAV, AAC, FLAC, M4A, OPUS, AC3
           </p>
           <div className="border-b border-gray-700  mx-auto items-center flex mb-5 mt-5"></div>
 
     <div className="mb-6 mt-8">
         <div
-            className={`lg:min-w-[400px] min-h-[250px] h-300 m-auto rounded-lg border-dashed ${isDragging ? 'border-2 border-blue-200' : 'border-[3px] border-blue-800'} ${uploadFile === null ? 'flex justify-center items-center cursor-pointer' : 'hidden'} ${isDragging ? '' : 'bg-blue-200'} text-black`}
+            className={`lg:min-w-[400px] min-h-[250px] h-300 m-auto rounded-lg border-dashed ${isDragging ? 'border-2 border-blue-200' : 'border-[2px] border-blue-800'} ${uploadFile === null ? 'flex justify-center items-center cursor-pointer' : 'hidden'} ${isDragging ? '' : 'bg-blue-200 opacity-80'} text-black`}
             onDragOver={dragOverHandler}
             onDragEnter={dragEnterHandler}
             onDragLeave={dragLeaveHandler}
@@ -224,7 +224,7 @@ if(progress!==null){
 {success &&
 <div className="flex flex-col">
   <p className="text-lg text-primaryColor mt-6">Your file has been successfully converted!</p>
-  <p className="mt-6 underline cursor-pointer text-md text-zinc-200" onClick={() => setUploadFile(null)}>Convert another file</p>
+  <p className="mt-6 underline cursor-pointer text-md text-zinc-200 w-[200px]" onClick={() => setUploadFile(null)}>Convert another file</p>
   </div>
 }
               <div className={`flex flex-col space-y-2 max-w-[200px] mt-6 ${(progress || success) && "hidden"}`} >
@@ -280,7 +280,12 @@ if(progress!==null){
         </div>
       
     </div>
-    
+    {success&&
+    <Alphy/>
+  }
+
+    <Explainer/>
+        
 </div>
 
   );
