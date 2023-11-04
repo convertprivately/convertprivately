@@ -22,7 +22,9 @@ export default function Audio() {
   const [extractionReady, setExtractionReady] = useState(false);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [outputFormat, setOutputFormat] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false)
 
+  const fileInputRef = useRef(null); // Reference to file input element
   useEffect(() => {
     const f = async () => {
       ffmpeg.current = await FFmpegWrapper.create();
@@ -44,16 +46,28 @@ export default function Audio() {
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       setExtractionReady(true);
       console.log("Extraction created");
-      setUploadFile(null);
+      /* setUploadFile(null); */
     };
     f();
   }, [ffmpegLoaded, uploadFile]);
 
-  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length === 1) {
-      const file = e.target.files[0];
+  
+
+  const handleFileUpload= async (e: ChangeEvent<HTMLInputElement>) => {
+    setSuccess(false)
+    
+    if ((e.target.files && e.target.files.length === 1) || e.dataTransfer.files && e.dataTransfer.files.length === 1) {
+      let file
+      if(e.target.files){
+      file = e.target.files[0];
+    }
+    else{
+      file = e.dataTransfer.files[0]
+    }
+  
       setUploadFile(file);
     } else {
+      
       setUploadFile(null);
       console.log("Here", extraction.current);
       if (extraction.current) {
@@ -67,6 +81,7 @@ export default function Audio() {
 
   const progressCallback: ProgressCallback = ({ progress, time }) => {
     setProgress({ progress, microseconds: time });
+    
   };
 
   const extractAndDownloadAudio = async () => {
@@ -88,14 +103,16 @@ export default function Audio() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      setExtractionReady(false);
       setProgress(null);
+      setSuccess(true)
+  
     } else {
       console.error("extraction is not ready yet");
     }
   };
 
   const outputFormatOptions = [
-    "default",
     "mp3",
     "ogg",
     "wav",
@@ -113,6 +130,51 @@ export default function Audio() {
       setOutputFormat(format);
     }
   };
+  const [isDragging, setIsDragging] = useState(false);
+
+  const dragOverHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const dragEnterHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const dragLeaveHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const dropHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    // Process dropped files...
+    let files = e.dataTransfer.files;
+    if(files.length > 1){
+      alert("Please drop only one file");
+      return;
+    }
+    else{
+      handleFileUpload(e)
+    }
+  };
+
+
+  const handleClick = () => {
+    if(fileInputRef.current){
+      fileInputRef.current.click();
+  }
+  };
+
+if(progress!==null){
+  console.log(progress.progress)
+}
+  
 
   return (
     <div className={`max-w-[900px] mx-auto w-full px-10`}>
