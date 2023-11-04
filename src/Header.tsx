@@ -1,6 +1,6 @@
 export function Header() {
   return (
-    <nav className="container max-w-[900px] px-10 lg:px-4"  style={{paddingTop: "1em"}}>
+    <nav className="container max-w-[900px] p-10 lg:p-6 mx-auto mt-10 mb-10"  >
       <ul
       style={{
         display: "flex",
@@ -12,9 +12,9 @@ export function Header() {
       }}>
         <li >
           
-          <a href="/"><p className="text-3xl text-primaryColor font-bold">PrivateConverter</p></a>
+          <a href="/"><p className="text-3xl text-white font-bold">PrivateConverterOrSomething</p></a>
         <br/><br/>
-        <p className="text-md">No clouds, no servers.        
+        <p className="text-md text-zinc-300">No clouds, no servers.        
 <br/>
 Convert video to audio, privately, in lightning speed.</p>
   </li>

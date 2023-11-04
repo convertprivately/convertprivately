@@ -8,7 +8,7 @@ export function Explainer (){
 
 
 return(
-  <div className="flex flex-col  mx-auto max-w-[900px] pb-20 sm:px-6 lg:px-6">
+  <div className="flex flex-col  mx-auto max-w-[900px] pb-20 sm:px-6 lg:px-0">
 <div className="flex flex-col sm:flex-row justify-between max-w-screen-lg mx-auto sm:my-8">
       {/* Single Feature */}
       <div className="flex flex-col p-4  sm:w-1/2" >
@@ -19,7 +19,7 @@ return(
         <h2 className="font-bold text-lg ml-4 text-white">Private</h2>
         </div>
         <p className="mt-4 text-sm text-zinc-300 ">
-        PrivateConverter handles all the process in your browser.  We don't see or store your files. Your data stays yours.        </p>
+        PrivateConverter handles all the process in your browser.  We do not see or store your files. Your data stays yours.        </p>
       </div>
 
       {/* Duplicate the above block for each feature */}

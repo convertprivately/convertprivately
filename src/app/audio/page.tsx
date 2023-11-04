@@ -18,13 +18,14 @@ export default function Audio() {
   const ffmpeg = useRef<FFmpegWrapper | null>(null);
   const [ffmpegLoaded, setFFmpegLoaded] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadFileName, setUploadFileName] = useState<string | "">("");
   const extraction = useRef<Extraction | null>(null);
   const [extractionReady, setExtractionReady] = useState(false);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [outputFormat, setOutputFormat] = useState<string | null>(null);
   const [success, setSuccess] = useState(false)
 
-  const fileInputRef = useRef(null); // Reference to file input element
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const f = async () => {
       ffmpeg.current = await FFmpegWrapper.create();
@@ -52,23 +53,47 @@ export default function Audio() {
   }, [ffmpegLoaded, uploadFile]);
 
   
+const handleFileUploadThroughDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+  let file
+      if(e.dataTransfer.files && e.dataTransfer.files.length === 1){
+        
+        file = e.dataTransfer.files[0];
+        setUploadFile(file);
+        setUploadFileName(file.name)
+
+      }
+      
+      else{
+          
+        setUploadFile(null);
+        setUploadFileName("")
+        console.log("Here", extraction.current);
+        if (extraction.current) {
+          await extraction.current.delete();
+          extraction.current = null;
+          setExtractionReady(false);
+        }
+        setProgress(null);
+      }
+
+}
+
 
   const handleFileUpload= async (e: ChangeEvent<HTMLInputElement>) => {
     setSuccess(false)
     
-    if ((e.target.files && e.target.files.length === 1) || e.dataTransfer.files && e.dataTransfer.files.length === 1) {
+    if (e.target.files && e.target.files.length === 1) {
       let file
-      if(e.target.files){
-      file = e.target.files[0];
-    }
-    else{
-      file = e.dataTransfer.files[0]
-    }
-  
+            
+            file = e.target.files[0];
+          
+          
       setUploadFile(file);
+      setUploadFileName(file.name)
     } else {
       
       setUploadFile(null);
+      setUploadFileName("")
       console.log("Here", extraction.current);
       if (extraction.current) {
         await extraction.current.delete();
@@ -132,24 +157,24 @@ export default function Audio() {
   };
   const [isDragging, setIsDragging] = useState(false);
 
-  const dragOverHandler = (e) => {
+  const dragOverHandler = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const dragEnterHandler = (e) => {
+  const dragEnterHandler = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
 
-  const dragLeaveHandler = (e) => {
+  const dragLeaveHandler = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
 
-  const dropHandler = (e) => {
+  const dropHandler = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -160,7 +185,7 @@ export default function Audio() {
       return;
     }
     else{
-      handleFileUpload(e)
+      handleFileUploadThroughDrop(e)
     }
   };
 
@@ -216,7 +241,7 @@ if(progress!==null){
         <div className={`${uploadFile ? 'flex flex-col mx-auto justify-center ' : 'hidden'}`}>
     
             <div className="flex flex-row justify-between">
-                <p className="text-white text-xl font-semibold ">{uploadFile ? uploadFile.name : "FileName"}  <ClearIcon onClick={() => setUploadFile(null)} fontSize="small" className="ml-4 mb-1 cursor-pointer" /></p>
+                <p className="text-white text-xl font-semibold ">{uploadFileName.length>0 ? uploadFileName : "Your File"}  <ClearIcon onClick={() => setUploadFile(null)} fontSize="small" className="ml-4 mb-1 cursor-pointer" /></p>
               
                 
             </div>
@@ -224,7 +249,7 @@ if(progress!==null){
 {success &&
 <div className="flex flex-col">
   <p className="text-lg text-primaryColor mt-6">Your file has been successfully converted!</p>
-  <p className="mt-6 underline cursor-pointer text-md text-zinc-200 w-[200px]" onClick={() => setUploadFile(null)}>Convert another file</p>
+  <p className="mt-6 underline cursor-pointer text-md text-zinc-200" onClick={() => setUploadFile(null)}>Convert another file</p>
   </div>
 }
               <div className={`flex flex-col space-y-2 max-w-[200px] mt-6 ${(progress || success) && "hidden"}`} >
@@ -246,13 +271,15 @@ if(progress!==null){
                   </select>
               </div>
 
-          <button
-            onClick={extractAndDownloadAudio}
-            aria-busy={progress !== null}
-            disabled={!extractionReady}
-          >
-            Extract
-          </button>
+            <button
+                onClick={extractAndDownloadAudio}
+                aria-busy={progress !== null}
+                disabled={!extractionReady}
+                className={`bg-blue-200 max-w-[300px] text-black p-2 rounded mt-6 ${success && "hidden"}`}
+            >
+                {(progress) ? "Converting" : (extractionReady)? "Convert" :  "Preparing the file..."}
+                
+            </button>
 
 
 
@@ -266,7 +293,7 @@ if(progress!==null){
                     <div className="w-80 h-40">
                         
                             <div className="flex flex-col space-y-2">
-                                <progress className="w-full bg-primaryColor" value={progress?.progress} max={1} />
+                                <progress className="w-full bg-primaryColor rounded-lg" value={progress?.progress} max={1} />
                                 <div className="flex justify-end">
                                     <span className="text-sm text-primaryColor">{Math.floor((progress.progress)*100)}%</span>
                                 </div>
@@ -280,13 +307,16 @@ if(progress!==null){
         </div>
       
     </div>
-    {success&&
-    <Alphy/>
-  }
+    {success && 
+    
+    <div><div className="border-b border-gray-700  mx-auto items-center flex mb-5 mt-5"></div>
+    <Alphy name={uploadFileName}/>
+    </div>}
 
     <Explainer/>
         
 </div>
+
 
   );
 }

@@ -5,8 +5,8 @@ export function Footer(){
 
 
     return(
-        <div className="bg-zinc-900 h-[175px] flex flex-row w-full pt-10 mx-auto px-10">
-            <div className=" max-w-[900px] mx-auto w-full flex flex-row justify-between">
+        <div className="bg-zinc-900 h-[175px] flex flex-row w-full pt-10 mx-auto ">
+            <div className=" max-w-[900px] mx-auto w-full flex flex-row justify-between px-10">
                 <div className= "flex flex-col">
                     <a href="https://alphy.app" target="_blank">
                     <div className="flex flex-row">

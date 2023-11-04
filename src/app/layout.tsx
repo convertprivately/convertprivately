@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "@picocss/pico";
+
+import "../../styles/globals.css";
 import { Header } from "@/Header";
 
 import { Footer } from "@/Footer";

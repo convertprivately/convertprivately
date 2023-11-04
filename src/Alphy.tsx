@@ -11,7 +11,13 @@ import { Carousel } from 'flowbite-react';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
-export default function Alphy(){
+interface AlphyProps {
+    name: string;
+  }
+
+  
+
+export default function Alphy({ name }: AlphyProps){
 
     const images = [Image_1, Image_2, Image_3, Image_4];
     const [slideIndex,setSlideIndex] = useState(0);
@@ -41,7 +47,8 @@ export default function Alphy(){
 
 return(
 <div className="flex flex-col items-center">
-    <p className="mt-5 mb-10 text-xl font-bold">Unlock your audio file with <a className="underline text-green-200" href="https://alphy.app/submit" target="_blank">Alphy’s AI</a></p>
+
+    <p className="mt-5 mb-10 text-xl font-bold text-white">Unlock <span className="underline">&quot{name.length>0? name : "your audio file"}&quot</span> with <a className="underline text-green-200" href="https://alphy.app/submit" target="_blank">Alphy’s AI</a></p>
     
     <div className="flex flex-col lg:flex-row ">
                     <button onClick={scrollBackward} type="button" className={`left-arrow w-[20px] hidden md:block justify-center my-auto flex items-center justify-center h-full cursor-pointer group focus:outline-none bg-transparent outline-none border-0 focus:border-0 focus:ring-0 ${
@@ -60,8 +67,8 @@ return(
                                                                                     
                                                            {images.map ((image, index) => (
 
-                                                                <a href="https://alphy.app" target="_blank"  >
-                                                                <Image key={index} width={1600} height={900}alt="Alphy logo" className={`${index===slideIndex ? "flex":"hidden"}  overflow-x-hidden border `} src={image}/>
+                                                                <a key={index} href="https://alphy.app" target="_blank"  >
+                                                                <Image width={1600} height={900}alt="Alphy logo" className={`${index===slideIndex ? "flex":"hidden"}  overflow-x-hidden border `} src={image}/>
                                                                 </a>
                                                            ))
                                                                 }
