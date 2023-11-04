@@ -36,27 +36,27 @@ export default function Alphy({ name }: AlphyProps) {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center mt-20">
       <p className="mt-5 mb-10 text-xl font-bold text-white">
-        Unlock{" "}
-        <span className="underline">
-          &quot{name.length > 0 ? name : "your audio file"}&quot
-        </span>{" "}
-        with{" "}
-        <a
+        Use    <a
           className="underline text-green-200"
           href="https://alphy.app/submit"
           target="_blank"
         >
           Alphy’s AI
-        </a>
+        </a> on {" "}
+        <span className="underline">
+         {name.length > 0 ? name : "your audio file"}
+        </span>{" "}
+        
+     
       </p>
 
       <div className="flex flex-col lg:flex-row ">
         <button
           onClick={scrollBackward}
           type="button"
-          className={`left-arrow w-[20px] hidden md:block justify-center my-auto flex items-center justify-center h-full cursor-pointer group focus:outline-none bg-transparent outline-none border-0 focus:border-0 focus:ring-0 ${""}`}
+          className={`left-arrow w-[20px] justify-center my-auto flex items-center justify-center h-full cursor-pointer group focus:outline-none bg-transparent outline-none border-0 focus:border-0 focus:ring-0 ${""}`}
         >
           <div className="rounded-full  p-1 mr-2  hover:opacity-100 hover:transition hover:duration-300 hover:ease-in-out">
             <ArrowBackIosNewIcon className="cursor-pointer text-white  " />
@@ -85,7 +85,7 @@ export default function Alphy({ name }: AlphyProps) {
         <button
           onClick={scrollForward}
           type="button"
-          className={` right-arrow w-[20px]  hidden md:block my-auto flex items-center justify-center h-full cursor-pointer group focus:outline-none bg-transparent outline-none border-0 focus:border-0 focus:ring-0 ${""}`}
+          className={` right-arrow w-[20px]   my-auto flex items-center justify-center h-full cursor-pointer group focus:outline-none bg-transparent outline-none border-0 focus:border-0 focus:ring-0 ${""}`}
         >
           <div className="rounded-full p-1 hover:opacity-100 hover:transition hover:duration-300 hover:ease-in-out">
             <ArrowForwardIosIcon className="cursor-pointer text-white " />

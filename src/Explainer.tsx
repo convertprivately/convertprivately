@@ -5,7 +5,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 
 export function Explainer() {
   return (
-    <div className="flex flex-col  mx-auto max-w-[900px] pb-20 sm:px-6 lg:px-0">
+    <div className="flex flex-col  mx-auto max-w-[900px] pb-20 sm:px-6 lg:px-0 mt-20">
       <div className="flex flex-col sm:flex-row justify-between max-w-screen-lg mx-auto sm:my-8">
         {/* Single Feature */}
         <div className="flex flex-col p-4  sm:w-1/2">
