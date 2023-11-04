@@ -126,7 +126,10 @@ export default function Audio() {
     }
   };
 
+  // These can be anything FFMpeg supports
+  // Maybe give as a textbox to cover all that is possible?
   const outputFormatOptions = [
+    "", //TODO: needs a good name or explaining
     "mp3",
     "ogg",
     "wav",
@@ -138,7 +141,7 @@ export default function Audio() {
   ];
   const onOutputFormatChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const format = e.target.value;
-    if (format === "default") {
+    if (format === "") {
       setOutputFormat(null);
     } else {
       setOutputFormat(format);
