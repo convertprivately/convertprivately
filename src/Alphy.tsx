@@ -61,7 +61,7 @@ return(
                                                            {images.map ((image, index) => (
 
                                                                 <a href="https://alphy.app" target="_blank"  >
-                                                                <Image width={1600} height={900}alt="Alphy logo" className={`${index===slideIndex ? "flex":"hidden"}  overflow-x-hidden border `} src={image}/>
+                                                                <Image key={index} width={1600} height={900}alt="Alphy logo" className={`${index===slideIndex ? "flex":"hidden"}  overflow-x-hidden border `} src={image}/>
                                                                 </a>
                                                            ))
                                                                 }

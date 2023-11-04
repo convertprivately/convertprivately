@@ -4,28 +4,33 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "sh get_ffmpeg.sh && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@ffmpeg/ffmpeg": "^0.12.7",
     "@ffmpeg/util": "^0.12.1",
+    "@mui/icons-material": "^5.14.16",
     "@picocss/pico": "^1.5.10",
     "async-mutex": "^0.4.0",
     "autoprefixer": "^10.4.16",
-    "flowbite-react": "^0.6.4",
     "next": "14.0.0",
     "path": "^0.12.7",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "tailwindcss": "^3.3.5"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.0.0"
+    "eslint-config-next": "14.0.0",
+    "postcss": "^8.4.31",
+    "postcss-cli": "^10.1.0",
+    "typescript": "^5"
   }
 }
