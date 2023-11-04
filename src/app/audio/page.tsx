@@ -3,6 +3,11 @@
 import { Extraction, FFmpegWrapper, ProgressCallback } from "@/FFmpegWrapper";
 import { audioFormatToFileType, microsecondsToString } from "@/utils";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
+import VideoFileIcon from '@mui/icons-material/VideoFile';
+import ClearIcon from '@mui/icons-material/Clear';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Explainer } from "@/Explainer";
+import Alphy from "@/Alphy";
 
 interface Progress {
   progress: number;
@@ -110,41 +115,74 @@ export default function Audio() {
   };
 
   return (
-    <>
-      <div className="container" style={{ padding: "3em" }}>
-        <p>For any video file given, extracts the audio for you.</p>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ width: "20em", height: "10em" }}>
-          <input
-            type="file"
-            id="upload"
-            name="Upload"
-            accept=".mp4, .mkv, .webm"
-            onChange={handleFileUpload}
-          />
+    <div className={`max-w-[900px] mx-auto w-full px-10`}>
+      <p className="mb-4 text-lg   font-semibold text-white">Convert your video file to MP3, OGG, WAV, AAC, FLAC, M4A, OPUS, AC3
+          </p>
+          <div className="border-b border-gray-700  mx-auto items-center flex mb-5 mt-5"></div>
 
-          <div style={{ display: "flex", flexDirection: "row", gap: "1em" }}>
-            <select
-              id="output-format"
-              defaultValue={"default"}
-              onChange={onOutputFormatChange}
-            >
-              {outputFormatOptions.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <label htmlFor="output-format">Output Format</label>
-          </div>
+    <div className="mb-6 mt-8">
+        <div
+            className={`lg:min-w-[400px] min-h-[250px] h-300 m-auto rounded-lg border-dashed ${isDragging ? 'border-2 border-blue-200' : 'border-[3px] border-blue-800'} ${uploadFile === null ? 'flex justify-center items-center cursor-pointer' : 'hidden'} ${isDragging ? '' : 'bg-blue-200'} text-black`}
+            onDragOver={dragOverHandler}
+            onDragEnter={dragEnterHandler}
+            onDragLeave={dragLeaveHandler}
+            onDrop={dropHandler}
+            onClick={handleClick}
+        >
+            <p className="text-center text-gray-700 flex flex-col items-center">
+            <VideoFileIcon fontSize="large" className="opacity-60 text-zinc-600 mb-2"/>
+                {isDragging ? 'Release to Drop' : 
+                
+                <div className="text-center text-gray-700 flex flex-col items-center">Drag & Drop your video file here
+             
+                  <br/>
+                  <p className="text-xs text-gray-700">MP4, MKV, WEBM</p>
+                
+                  </div>}
+            </p>
+            <input
+                ref={fileInputRef}
+                className="hidden"
+                type="file"
+                id="upload"
+                name="Upload"
+                accept=".mp4, .mkv, .webm"
+                onChange={handleFileUpload}
+            />
+        </div>
+
+        <div className={`${uploadFile ? 'flex flex-col mx-auto justify-center ' : 'hidden'}`}>
+    
+            <div className="flex flex-row justify-between">
+                <p className="text-white text-xl font-semibold ">{uploadFile ? uploadFile.name : "FileName"}  <ClearIcon onClick={() => setUploadFile(null)} fontSize="small" className="ml-4 mb-1 cursor-pointer" /></p>
+              
+                
+            </div>
+
+{success &&
+<div className="flex flex-col">
+  <p className="text-lg text-primaryColor mt-6">Your file has been successfully converted!</p>
+  <p className="mt-6 underline cursor-pointer text-md text-zinc-200" onClick={() => setUploadFile(null)}>Convert another file</p>
+  </div>
+}
+              <div className={`flex flex-col space-y-2 max-w-[200px] mt-6 ${(progress || success) && "hidden"}`} >
+              
+                  <label htmlFor="output-format" className="block text-xs leading-5 font-medium text-zinc-300">
+                      Pick Output Format
+                  </label>
+                  <select
+                      id="output-format"
+                      defaultValue="default"
+                      onChange={onOutputFormatChange}
+                      className="block w-full py-1.5 px-3 border border-gray-300 bg-zinc-900 text-zinc-100 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                      {outputFormatOptions.map((option, index) => (
+                          <option key={index} value={option}>
+                              {option}
+                          </option>
+                      ))}
+                  </select>
+              </div>
 
           <button
             onClick={extractAndDownloadAudio}
@@ -154,16 +192,34 @@ export default function Audio() {
             Extract
           </button>
 
-          {progress && (
-            <>
-              <progress value={progress?.progress} max={1} />
-              <div style={{ display: "flex", flexDirection: "row", justifyContent: "flex-end" }}>
-                <span>{microsecondsToString(progress.microseconds)}</span>
-              </div>
-            </>
-          )}
+
+
+            <div className="flex flex-col">
+                        {progress &&
+                        <div className="flex flex-col text-primaryColor mt-6 mb-6">
+                          Please do not close this tab or the browser until the process is complete. Your download will start automatically once the conversion is complete.
+                          </div>}
+                          {progress && (
+                <div className="flex flex-col w-full">
+                    <div className="w-80 h-40">
+                        
+                            <div className="flex flex-col space-y-2">
+                                <progress className="w-full bg-primaryColor" value={progress?.progress} max={1} />
+                                <div className="flex justify-end">
+                                    <span className="text-sm text-primaryColor">{Math.floor((progress.progress)*100)}%</span>
+                                </div>
+                            </div>
+                        
+                    </div>
+                    
+                </div>
+                )}
+    </div>
         </div>
-      </div>
-    </>
+      
+    </div>
+    
+</div>
+
   );
 }

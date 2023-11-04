@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "@picocss/pico";
 import { Header } from "@/Header";
 
+import { Footer } from "@/Footer";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,6 +22,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <Header />
         {children}
+
+        <Footer/>
       </body>
     </html>
   );

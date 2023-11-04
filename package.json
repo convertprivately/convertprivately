@@ -13,6 +13,8 @@
     "@ffmpeg/util": "^0.12.1",
     "@picocss/pico": "^1.5.10",
     "async-mutex": "^0.4.0",
+    "autoprefixer": "^10.4.16",
+    "flowbite-react": "^0.6.4",
     "next": "14.0.0",
     "path": "^0.12.7",
     "react": "^18",
