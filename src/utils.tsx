@@ -50,3 +50,24 @@ export function microsecondsToString(microseconds: number): string {
 
   return `${hoursString}:${minutesString}:${secondsString}`;
 }
+
+export function durationStringToMicroseconds(duration: string) {
+  const pattern = /^(\d+):(\d{2}):(\d{2})(?:\.(\d*))?$/;
+  const match = pattern.exec(duration.trim());
+
+  if (match) {
+    const hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const seconds = parseInt(match[3], 10);
+    // If milliseconds are not provided, default to zero
+    const milliseconds = match[4] ? parseInt(match[4], 10) : 0;
+    const microseconds = milliseconds * 1000; // Convert milliseconds to microseconds
+
+    // Convert the duration parts to microseconds and sum them up
+    return (
+      hours * 3600000000 + minutes * 60000000 + seconds * 1000000 + microseconds
+    );
+  } else {
+    throw new Error("Invalid duration format");
+  }
+}

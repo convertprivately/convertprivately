@@ -1,7 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Mutex } from "async-mutex";
 import path from "path";
-import { changeExtension, microsecondsToString } from "./utils";
+import { changeExtension, durationStringToMicroseconds, microsecondsToString } from "./utils";
 
 export type ProgressCallback = ({progress, time}: {progress: number, time: number}) => void;
 
@@ -50,19 +50,30 @@ export class FFmpegWrapper {
     this.logLines.push({ type, message });
   }
 
-  public async audioFormat(filename: string): Promise<string> {
+  public async audioMetadata(filename: string): Promise<{duration: number, format: string}> {
     return await this.mutex.runExclusive(async () => {
       const len = this.logLines.length;
-      this.log("COMMAND", "Querying audio format for " + filename);
+      this.log("COMMAND", "Querying audio metadata for " + filename);
       await this.ffmpeg.exec(["-i", filename, "-hide_banner"]);
       const lines = this.logLines.slice(len);
-      const line = lines.find((line) => line.message.includes("Audio:"));
+
+      // format
+      let line = lines.find((line) => line.message.includes("Audio:"));
       if (!line) {
         throw new Error("No audio format for " + filename);
       }
       const format = line.message.split("Audio: ")[1].split(" ")[0];
-      this.log("RESULT", "Audio format for " + filename + " is " + format);
-      return format;
+
+      // duration
+      line = lines.find((line) => line.message.includes("Duration:"));
+      if (!line) {
+        throw new Error("No duration for " + filename);
+      }
+      const durationStr = line.message.split("Duration: ")[1].split(",")[0];
+      const duration = durationStringToMicroseconds(durationStr);
+
+      this.log("RESULT", "For file " + filename + ", format is " + format + " and duration is " + duration);
+      return {duration, format};
     });
   }
   
@@ -121,7 +132,8 @@ export class FFmpegWrapper {
       command.push("-q:a", "0", "-map", "a");
     } else {
       command.push("-vn", "-acodec", "copy");
-      finalFormat = await this.audioFormat(filename);
+      const metadata = await this.audioMetadata(filename);
+      finalFormat = metadata.format;
     }
     const outputFilename = changeExtension(filename, finalFormat);
     command.push(outputFilename);
@@ -218,8 +230,12 @@ export class Extraction {
     await this.ffmpeg.deleteFile(this.input);
   }
 
-  public async audioFormat(): Promise<string> {
-    return await this.ffmpeg.audioFormat(this.input);
+  
+  /**
+   * @returns {Promise<{duration: number, format: string}>} The format of the audio file and duration (in microseconds).
+   */
+  public async audioMetadata(): Promise<{duration: number, format: string}> {
+    return await this.ffmpeg.audioMetadata(this.input);
   }
 
   /**

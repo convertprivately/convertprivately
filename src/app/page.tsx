@@ -23,8 +23,6 @@ export default function Audio() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [outputFormat, setOutputFormat] = useState<string | any>("");
   const [success, setSuccess] = useState(false);
-  const [value, setValue] = useState([0, 100]);
-
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +45,8 @@ export default function Audio() {
         setExtractionReady(false);
       }
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
+      // This can be used to set the output format in the select box as well.
+      console.log("Metadata", await extraction.current.audioMetadata());
       setExtractionReady(true);
       console.log("Extraction created");
       /* setUploadFile(null); */
