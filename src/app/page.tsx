@@ -24,7 +24,6 @@ export default function Audio() {
   const [outputFormat, setOutputFormat] = useState<string | any>("");
   const [success, setSuccess] = useState(false);
 
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const f = async () => {
@@ -74,9 +73,7 @@ export default function Audio() {
       setProgress(null);
     }
   };
-  
-  
-  
+
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     setSuccess(false);
 
@@ -87,7 +84,7 @@ export default function Audio() {
 
       setUploadFile(file);
       setUploadFileName(file.name);
-      console.log
+      console.log;
     } else {
       setUploadFile(null);
       setUploadFileName("");
@@ -108,12 +105,11 @@ export default function Audio() {
   const extractAndDownloadAudio = async () => {
     if (extraction.current) {
       setProgress({ progress: 0, microseconds: 0 });
-      const namedPayload = await extraction.current.extractAudio(
-        {format: outputFormat,
-          
-        progressCallback: progressCallback
-        }
-      );
+      const namedPayload = await extraction.current.extractAudio({
+        format: outputFormat,
+
+        progressCallback: progressCallback,
+      });
       const blob = new Blob([namedPayload.payload], {
         type: audioFormatToFileType(namedPayload.format),
       });
@@ -194,17 +190,12 @@ export default function Audio() {
     }
   };
 
-  
-
   return (
     <div className={`max-w-[900px] mx-auto w-full px-10 lg:px-6`}>
-  
-  
       <p className="mb-4 text-lg   font-semibold text-white">
         Convert your video file to MP3, OGG, WAV, AAC, FLAC, M4A, OPUS, AC3
       </p>
       <div className="border-b border-gray-700  mx-auto items-center flex mb-5 mt-5"></div>
-      
 
       <div className="mb-6 mt-8">
         <div
@@ -251,10 +242,16 @@ export default function Audio() {
 
         <div
           className={`${
-            (uploadFile||success) ? "flex flex-col mx-auto justify-center " : "hidden"
+            uploadFile || success
+              ? "flex flex-col mx-auto justify-center "
+              : "hidden"
           }`}
         >
-          <div className= {` ${success ? "hidden" : "flex flex-row justify-between"}`} >
+          <div
+            className={` ${
+              success ? "hidden" : "flex flex-row justify-between"
+            }`}
+          >
             <p className="text-white text-xl font-semibold ">
               {uploadFileName.length > 0 ? uploadFileName : "Your File"}{" "}
               <ClearIcon
@@ -288,14 +285,13 @@ export default function Audio() {
               className="block text-sm leading-5 font-medium text-zinc-300"
             >
               Pick Output Format
-              <br/>
-             
+              <br />
             </label>
             <select
               id="output-format"
               defaultValue="default"
               onChange={onOutputFormatChange}
-              className={`block max-w-[200px] w-full py-1.5 px-3 border border-gray-300 bg-zinc-800 text-zinc-100 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm `} 
+              className={`block max-w-[200px] w-full py-1.5 px-3 border border-gray-300 bg-zinc-800 text-zinc-100 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm `}
             >
               {outputFormatOptions.map((option, index) => (
                 <option key={index} value={option} className={``}>
@@ -303,7 +299,10 @@ export default function Audio() {
                 </option>
               ))}
             </select>
-            <p className="text-xs leading-5 font-medium text-zinc-300">Note: Default option automatically detects the original audio format of the video file.</p>
+            <p className="text-xs leading-5 font-medium text-zinc-300">
+              Note: Default option automatically detects the original audio
+              format of the video file.
+            </p>
           </div>
 
           <button
@@ -325,7 +324,7 @@ export default function Audio() {
             {progress && (
               <div className="flex flex-col text-primaryColor mt-6 mb-6">
                 Please do not close this tab or the browser until the process is
-                complete. <br/> Your download will start automatically once the
+                complete. <br /> Your download will start automatically once the
                 conversion is complete.
               </div>
             )}
@@ -353,7 +352,6 @@ export default function Audio() {
 
       {success && (
         <div>
-          
           <Alphy name={uploadFileName} />
         </div>
       )}

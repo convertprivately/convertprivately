@@ -1,9 +1,19 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Mutex } from "async-mutex";
 import path from "path";
-import { changeExtension, durationStringToMicroseconds, microsecondsToString } from "./utils";
+import {
+  changeExtension,
+  durationStringToMicroseconds,
+  microsecondsToString,
+} from "./utils";
 
-export type ProgressCallback = ({progress, time}: {progress: number, time: number}) => void;
+export type ProgressCallback = ({
+  progress,
+  time,
+}: {
+  progress: number;
+  time: number;
+}) => void;
 
 export class FFmpegWrapper {
   private ffmpeg: FFmpeg = new FFmpeg();
@@ -50,7 +60,9 @@ export class FFmpegWrapper {
     this.logLines.push({ type, message });
   }
 
-  public async audioMetadata(filename: string): Promise<{duration: number, format: string}> {
+  public async audioMetadata(
+    filename: string
+  ): Promise<{ duration: number; format: string }> {
     return await this.mutex.runExclusive(async () => {
       const len = this.logLines.length;
       this.log("COMMAND", "Querying audio metadata for " + filename);
@@ -72,22 +84,30 @@ export class FFmpegWrapper {
       const durationStr = line.message.split("Duration: ")[1].split(",")[0];
       const duration = durationStringToMicroseconds(durationStr);
 
-      this.log("RESULT", "For file " + filename + ", format is " + format + " and duration is " + duration);
-      return {duration, format};
+      this.log(
+        "RESULT",
+        "For file " +
+          filename +
+          ", format is " +
+          format +
+          " and duration is " +
+          duration
+      );
+      return { duration, format };
     });
   }
-  
+
   /**
    * Builds a command array for audio extraction using FFmpeg.
-   * 
+   *
    * @param {Object} options - The options for the audio extraction command.
    * @param {string} options.filename - The name of the input audio file.
    * @param {number} [options.start] - The start time in microseconds for the audio extraction.
    * @param {number} [options.end] - The end time in microseconds for the audio extraction.
    * @param {string} [options.format] - The desired output format of the audio file, if not provided the original format is used.
-   * 
+   *
    * @returns A promise that resolves to an object containing an array of command line arguments for FFmpeg and the outputFilename.
-   * 
+   *
    * @example
    * // Example with format specified, extracting a portion from 30 seconds to 1 minute as a WAV file
    * // returns command ['-i', 'audio.mp3', '-ss', '00:00:30', '-to', '00:01:00', '-q:a', '0', '-map', 'a', 'audio.wav']
@@ -97,7 +117,7 @@ export class FFmpegWrapper {
    *   end: 60000000,
    *   format: 'wav'
    * });
-   * 
+   *
    * @example
    * // Example without format specified, extracting the full audio without re-encoding
    * // returns command ['-i', 'audio.mp3', '-ss', '00:00:30', '-vn', '-acodec', 'copy', 'audio.mp3']
@@ -105,7 +125,7 @@ export class FFmpegWrapper {
    *   filename: 'audio.mp3'
    *   start: 30000000,
    * });
-   * 
+   *
    * @async
    * @function buildAudioExtractionCommand
    */
@@ -119,7 +139,11 @@ export class FFmpegWrapper {
     start?: number;
     end?: number;
     format?: string;
-  }): Promise<{command: string[], outputFilename: string, outputFormat: string}> {
+  }): Promise<{
+    command: string[];
+    outputFilename: string;
+    outputFormat: string;
+  }> {
     const command = ["-i", filename];
     let finalFormat: string | undefined = format;
     if (start) {
@@ -137,9 +161,9 @@ export class FFmpegWrapper {
     }
     const outputFilename = changeExtension(filename, finalFormat);
     command.push(outputFilename);
-  
-    return {command, outputFilename, outputFormat: finalFormat};
-  } 
+
+    return { command, outputFilename, outputFormat: finalFormat };
+  }
 
   public async extractAudio({
     filename,
@@ -158,12 +182,13 @@ export class FFmpegWrapper {
       this.ffmpeg.on("progress", progressCallback);
     }
 
-    const {command, outputFilename, outputFormat} = await this.buildAudioExtractionCommand({
-      filename,
-      format,
-      start,
-      end,
-    });
+    const { command, outputFilename, outputFormat } =
+      await this.buildAudioExtractionCommand({
+        filename,
+        format,
+        start,
+        end,
+      });
 
     return await this.mutex.runExclusive(async () => {
       this.log("COMMAND", "Extracting audio with command " + command.join(" "));
@@ -230,11 +255,10 @@ export class Extraction {
     await this.ffmpeg.deleteFile(this.input);
   }
 
-  
   /**
    * @returns {Promise<{duration: number, format: string}>} The format of the audio file and duration (in microseconds).
    */
-  public async audioMetadata(): Promise<{duration: number, format: string}> {
+  public async audioMetadata(): Promise<{ duration: number; format: string }> {
     return await this.ffmpeg.audioMetadata(this.input);
   }
 
@@ -276,6 +300,6 @@ export class Extraction {
     end?: number;
     progressCallback?: ProgressCallback;
   }): Promise<NamedPayload> {
-    return await this.ffmpeg.extractAudio({...options, filename: this.input});
+    return await this.ffmpeg.extractAudio({ ...options, filename: this.input });
   }
 }
