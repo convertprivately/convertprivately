@@ -9,8 +9,8 @@ import { Footer } from "@/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QuickLodge",
-  description: "Tools by Alphy",
+  title: "Convert Privately",
+  description: "Conversion tool that works locally without uploading files.",
 };
 
 export default function RootLayout({

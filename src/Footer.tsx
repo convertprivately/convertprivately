@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Alphy from "../public/img/ALPHY_BG_REMOVED_LIGHT.png";
+import Alphy from "../public/img/alphy_bgremoved_light.png";
 
 export function Footer() {
   return (

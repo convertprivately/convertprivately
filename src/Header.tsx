@@ -13,7 +13,7 @@ export function Header() {
         <li>
           <a href="/">
             <p className="text-3xl text-white font-bold">
-              PrivateConverterOrSomething
+              Convert Privately
             </p>
           </a>
           <br />
