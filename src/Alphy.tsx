@@ -1,10 +1,6 @@
 "use client";
 // import AlphyImage from "../public/img/ALPHY_BG_REMOVED_LIGHT.png";
 // import OtherAlphyImage from "../public/img/ALPHY_BG_REMOVED_DARK.png";
-import Image_1 from "../public/img/1.png";
-import Image_2 from "../public/img/2.png";
-import Image_3 from "../public/img/3.png";
-import Image_4 from "../public/img/4.png";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -15,7 +11,24 @@ interface AlphyProps {
 }
 
 export default function Alphy({ name }: AlphyProps) {
-  const images = [Image_1, Image_2, Image_3, Image_4];
+  const images = [
+    {
+      url: "/img/1.png",
+      alt: "Transcribe, summarize and ask questions to your audio files",
+    },
+    {
+      url: "/img/2.png",
+      alt: "High quality transcription in more than 50 languages",
+    },
+    {
+      url: "/img/3.png",
+      alt: "Ask questions to your audio files and get timestamped answers",
+    },
+    {
+      url: "/img/4.png",
+      alt: "Lectures, meetings, interviews, podcasts... Unlock the power of audio with AI",
+    },
+  ];
   const [slideIndex, setSlideIndex] = useState(0);
   const carouselRef = useRef(null);
 
@@ -38,18 +51,18 @@ export default function Alphy({ name }: AlphyProps) {
   return (
     <div className="flex flex-col items-center mt-20">
       <p className="mt-5 mb-10 text-xl font-bold text-white">
-        Use    <a
+        Use{" "}
+        <a
           className="underline text-green-200"
           href="https://alphy.app/submit"
           target="_blank"
         >
           Alphy’s AI
-        </a> on {" "}
+        </a>{" "}
+        on{" "}
         <span className="underline">
-         {name.length > 0 ? name : "your audio file"}
+          {name.length > 0 ? name : "your audio file"}
         </span>{" "}
-        
-     
       </p>
 
       <div className="flex flex-col lg:flex-row ">
@@ -72,11 +85,12 @@ export default function Alphy({ name }: AlphyProps) {
               <Image
                 width={1600}
                 height={900}
-                alt="Alphy logo"
+                alt={image.alt}
                 className={`${
                   index === slideIndex ? "flex" : "hidden"
                 }  overflow-x-hidden border `}
-                src={image}
+                src={image.url}
+                priority // preload
               />
             </a>
           ))}
