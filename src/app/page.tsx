@@ -1,7 +1,7 @@
 "use client";
 
 import { Extraction, FFmpegWrapper, ProgressCallback } from "@/FFmpegWrapper";
-import { audioFormatToFileType } from "@/utils";
+import { audioFormatToFileType, durationStringToMicroseconds, microsecondsToString } from "@/utils";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import VideoFileIcon from "@mui/icons-material/VideoFile";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -21,8 +21,9 @@ export default function Audio() {
   const extraction = useRef<Extraction | null>(null);
   const [extractionReady, setExtractionReady] = useState(false);
   const [progress, setProgress] = useState<Progress | null>(null);
-  const [outputFormat, setOutputFormat] = useState<string | any>("");
+  const [outputFormat, setOutputFormat] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const supportedFormats = useRef<Set<string> | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -30,6 +31,9 @@ export default function Audio() {
       ffmpeg.current = await FFmpegWrapper.create();
       setFFmpegLoaded(true);
       console.log("FFmpeg loaded");
+      const formats = await ffmpeg.current!.supportedFormats();
+      supportedFormats.current = formats;
+      console.log("FORMATS: ", formats);
     };
     f();
   }, []);
@@ -45,7 +49,10 @@ export default function Audio() {
       }
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       // This can be used to set the output format in the select box as well.
-      console.log("Metadata", await extraction.current.audioMetadata());
+      const metadata = await extraction.current.audioMetadata();
+      setOutputFormat(metadata.format);
+      console.log("Default output format:", metadata.format)
+      console.log("Audio duration: "+ microsecondsToString(metadata.duration));
       setExtractionReady(true);
       console.log("Extraction created");
       /* setUploadFile(null); */
@@ -64,7 +71,6 @@ export default function Audio() {
     } else {
       setUploadFile(null);
       setUploadFileName("");
-      console.log("Here", extraction.current);
       if (extraction.current) {
         await extraction.current.delete();
         extraction.current = null;
@@ -88,7 +94,6 @@ export default function Audio() {
     } else {
       setUploadFile(null);
       setUploadFileName("");
-      console.log("Here", extraction.current);
       if (extraction.current) {
         await extraction.current.delete();
         extraction.current = null;
@@ -103,11 +108,10 @@ export default function Audio() {
   };
 
   const extractAndDownloadAudio = async () => {
-    if (extraction.current) {
+    if (extraction.current && outputFormat) {
       setProgress({ progress: 0, microseconds: 0 });
       const namedPayload = await extraction.current.extractAudio({
         format: outputFormat,
-
         progressCallback: progressCallback,
       });
       const blob = new Blob([namedPayload.payload], {

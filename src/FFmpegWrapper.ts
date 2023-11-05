@@ -60,6 +60,30 @@ export class FFmpegWrapper {
     this.logLines.push({ type, message });
   }
 
+  public async supportedFormats(): Promise<Set<string>> {
+    return await this.mutex.runExclusive(async () => {
+      const len = this.logLines.length;
+      this.log("COMMAND", "Querying supported formats");
+      await this.ffmpeg.exec(["-formats", "-hide_banner"]);
+      /* Skip first 4 lines, which are:
+        File formats:
+        D. = Demuxing supported
+        .E = Muxing supported
+        --
+
+        And the last line which is Aborted().
+
+        Do not know why 5 works instead of 4
+        */
+      const lines = this.logLines.slice(len + 5, -1);
+      const regex = /^\s*([DE]{1,2})\s*(\S+)\s+(?=\S)/;
+      const formats = lines.map((l) => l.message.match(regex)).map((m) => m![2]).flatMap((s) => s.split(","));
+      const formats_set = new Set(formats);
+      this.log("RESULT", "Supported formats: " + formats);
+      return formats_set;
+    });
+  }
+
   public async audioMetadata(
     filename: string
   ): Promise<{ duration: number; format: string }> {

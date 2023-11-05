@@ -21,7 +21,7 @@ export function Header() {
           <p className="text-md text-zinc-300">
             No clouds, no servers.
             <br />
-            Convert video to audio, privately, in lightning speed.
+            Convert video to audio, or audio to audio, privately, in lightning speed.
           </p>
         </li>
         <li> </li>
