@@ -1,15 +1,17 @@
 "use client";
 
 import { Extraction, FFmpegWrapper, ProgressCallback } from "@/FFmpegWrapper";
-import { audioFormatToFileType, durationStringToMicroseconds, microsecondsToString } from "@/utils";
+import {
+  audioFormatToFileType,
+  durationStringToMicroseconds,
+  microsecondsToString,
+} from "@/utils";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import VideoFileIcon from "@mui/icons-material/VideoFile";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Explainer } from "@/Explainer";
 import Alphy from "@/Alphy";
-import Slider from '@mui/material/Slider';
-import Input from '@mui/material/Input';
-import SettingsIcon from '@mui/icons-material/Settings';
+import SettingsIcon from "@mui/icons-material/Settings";
 interface Progress {
   progress: number;
   microseconds: number;
@@ -26,16 +28,16 @@ export default function Audio() {
   const [outputFormat, setOutputFormat] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const supportedFormats = useRef<Set<string> | null>(null);
-  const [duration, setDuration] = useState<number >(0);
+  const [duration, setDuration] = useState<number>(0);
   const [value, setValue] = useState<number[]>([0, 100]);
-  const [valueText,setValueText] = useState<string[]>(["",""])
-  const [startTimeInput,setStartTimeInput] = useState<string>("")
-  const [endTimeInput,setEndTimeInput] = useState<string>("")
-  const [showAdvancedOptions,setShowAdvancedOptions] = useState<boolean>(false)
-  const [originalOutputformat,setOriginalOutputFormat] = useState<string>("")
-  const [originalFileType,setOriginalFileType] = useState<string | null>(null)
-  const [error,setError] = useState<string>("")
-
+  const [valueText, setValueText] = useState<string[]>(["", ""]);
+  const [startTimeInput, setStartTimeInput] = useState<string>("");
+  const [endTimeInput, setEndTimeInput] = useState<string>("");
+  const [showAdvancedOptions, setShowAdvancedOptions] =
+    useState<boolean>(false);
+  const [originalOutputformat, setOriginalOutputFormat] = useState<string>("");
+  const [originalFileType, setOriginalFileType] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -50,8 +52,6 @@ export default function Audio() {
     f();
   }, []);
 
-
-
   useEffect(() => {
     if (!ffmpegLoaded) return;
     if (!uploadFile) return;
@@ -64,15 +64,15 @@ export default function Audio() {
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       // This can be used to set the output format in the select box as well.
       const metadata = await extraction.current.audioMetadata();
-      setDuration(metadata.duration)
-      setStartTimeInput("00:00:00")
-      setEndTimeInput(microsecondsToString(metadata.duration))
+      setDuration(metadata.duration);
+      setStartTimeInput("00:00:00");
+      setEndTimeInput(microsecondsToString(metadata.duration));
 
       setOutputFormat(metadata.format);
       setOriginalOutputFormat(metadata.format);
       setExtractionReady(true);
-      console.log("Default output format:", metadata.format)
-      console.log("Audio duration: "+ microsecondsToString(metadata.duration));
+      console.log("Default output format:", metadata.format);
+      console.log("Audio duration: " + microsecondsToString(metadata.duration));
 
       console.log("Extraction created");
       /* setUploadFile(null); */
@@ -82,37 +82,40 @@ export default function Audio() {
 
   function getFileType(filename: string): string | null {
     // Find the last occurrence of the dot
-    const lastDotIndex = filename.lastIndexOf('.');
-  
+    const lastDotIndex = filename.lastIndexOf(".");
+
     // Check if the dot is in a valid position to represent a file extension
     if (lastDotIndex === -1 || lastDotIndex === 0) {
       return null; // No extension found
     }
-  
+
     // Extract the file type
     const fileType = filename.substring(lastDotIndex + 1);
     return fileType;
   }
-  
-  
 
   const handleFileUploadThroughDrop = async (
     e: React.DragEvent<HTMLDivElement>
   ) => {
-    setError("")
-    setSuccess(false)
+    setError("");
+    setSuccess(false);
     let file;
-    
-
-   
 
     if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
-     
       file = e.dataTransfer.files[0];
-      const fileType = getFileType(file.name)
-      setOriginalFileType(fileType)
-      if(fileType === "mp3" || fileType === "ogg" || fileType === "wav" || fileType === "aac" || fileType === "flac" || fileType === "m4a" || fileType === "opus" || fileType === "ac3"){
-        setShowAdvancedOptions(true)
+      const fileType = getFileType(file.name);
+      setOriginalFileType(fileType);
+      if (
+        fileType === "mp3" ||
+        fileType === "ogg" ||
+        fileType === "wav" ||
+        fileType === "aac" ||
+        fileType === "flac" ||
+        fileType === "m4a" ||
+        fileType === "opus" ||
+        fileType === "ac3"
+      ) {
+        setShowAdvancedOptions(true);
       }
       setUploadFile(file);
       setUploadFileName(file.name);
@@ -130,22 +133,30 @@ export default function Audio() {
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     setSuccess(false);
-    setError("")
+    setError("");
 
     if (e.target.files && e.target.files.length === 1) {
       let file;
 
       file = e.target.files[0];
-      const fileType = getFileType(file.name)
-      setOriginalFileType(fileType)
-      if(fileType === "mp3" || fileType === "ogg" || fileType === "wav" || fileType === "aac" || fileType === "flac" || fileType === "m4a" || fileType === "opus" || fileType === "ac3"){
-        setShowAdvancedOptions(true)
+      const fileType = getFileType(file.name);
+      setOriginalFileType(fileType);
+      if (
+        fileType === "mp3" ||
+        fileType === "ogg" ||
+        fileType === "wav" ||
+        fileType === "aac" ||
+        fileType === "flac" ||
+        fileType === "m4a" ||
+        fileType === "opus" ||
+        fileType === "ac3"
+      ) {
+        setShowAdvancedOptions(true);
       }
 
       setUploadFile(file);
       setUploadFileName(file.name);
-      setOriginalFileType(getFileType(file.name))
-      
+      setOriginalFileType(getFileType(file.name));
     } else {
       setUploadFile(null);
       setUploadFileName("");
@@ -163,18 +174,17 @@ export default function Audio() {
   };
 
   const extractAndDownloadAudio = async () => {
-    
     if (extraction.current && outputFormat) {
-      if(originalOutputformat === outputFormat){
-        setError("Please select a different output format")
-        return
+      if (originalOutputformat === outputFormat) {
+        setError("Please select a different output format");
+        return;
       }
-      setError("")
+      setError("");
       setProgress({ progress: 0, microseconds: 0 });
       const namedPayload = await extraction.current.extractAudio({
         format: outputFormat,
-        start:duration*value[0]/100,
-        end: duration*value[1]/100,
+        start: (duration * value[0]) / 100,
+        end: (duration * value[1]) / 100,
         progressCallback: progressCallback,
       });
       const blob = new Blob([namedPayload.payload], {
@@ -261,122 +271,113 @@ export default function Audio() {
 
     // Check if the current value matches the format "hh:mm:ss"
     if (!/^\d{2}:\d{2}:\d{2}$/.test(newValue)) {
-      setStartTimeInput(microsecondsToString(value[0]*duration/100))
-      return
+      setStartTimeInput(microsecondsToString((value[0] * duration) / 100));
+      return;
     } else {
-      
       // Parse the timestamp
-      const [hours, minutes, seconds] = newValue.split(':').map(Number);
-      const[hoursEnd,minutesEnd,secondsEnd] = endTimeInput.split(':').map(Number)
-      const [hoursStart,minutesStart,secondsStart] = newValue.split(':').map(Number)
+      const [hours, minutes, seconds] = newValue.split(":").map(Number);
+      const [hoursEnd, minutesEnd, secondsEnd] = endTimeInput
+        .split(":")
+        .map(Number);
+      const [hoursStart, minutesStart, secondsStart] = newValue
+        .split(":")
+        .map(Number);
 
       // Convert to microseconds
-      const microseconds = ((hours * 60 * 60) + (minutes * 60) + seconds) * 1e6;
-      const microsecondsEnd = ((hoursEnd * 60 * 60) + (minutesEnd * 60) + secondsEnd) * 1e6;
-      const microsecondsStart = ((hoursStart * 60 * 60) + (minutesStart * 60) + secondsStart) * 1e6;
+      const microseconds = (hours * 60 * 60 + minutes * 60 + seconds) * 1e6;
+      const microsecondsEnd =
+        (hoursEnd * 60 * 60 + minutesEnd * 60 + secondsEnd) * 1e6;
+      const microsecondsStart =
+        (hoursStart * 60 * 60 + minutesStart * 60 + secondsStart) * 1e6;
 
-      if(microseconds > duration){
-        setValue([100,100])
-        setStartTimeInput(microsecondsToString(duration))
+      if (microseconds > duration) {
+        setValue([100, 100]);
+        setStartTimeInput(microsecondsToString(duration));
       }
 
-      
-      if(microseconds >microsecondsEnd){
-        setStartTimeInput(microsecondsToString(microsecondsEnd))
+      if (microseconds > microsecondsEnd) {
+        setStartTimeInput(microsecondsToString(microsecondsEnd));
 
-        setValue([value[1],value[1]])
-
+        setValue([value[1], value[1]]);
+      } else {
+        setValue([(microseconds / duration) * 100, value[1]]);
+        setStartTimeInput(microsecondsToString(microseconds));
       }
-
-      else{
-        
-        setValue([microseconds/duration*100,value[1]])
-        setStartTimeInput(microsecondsToString(microseconds))
-      }
-     
-        
-      };
-      // Here you can handle the microseconds further as needed
-    
+    }
+    // Here you can handle the microseconds further as needed
   };
   const handleBlurEnd = (event: React.FocusEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 
     // Check if the current value matches the format "hh:mm:ss"
     if (!/^\d{2}:\d{2}:\d{2}$/.test(newValue)) {
-      setEndTimeInput(microsecondsToString(value[1]*duration/100))
-      return
+      setEndTimeInput(microsecondsToString((value[1] * duration) / 100));
+      return;
     } else {
-      
       // Parse the timestamp
-      const [hours, minutes, seconds] = newValue.split(':').map(Number);
-      const[hoursEnd,minutesEnd,secondsEnd] = endTimeInput.split(':').map(Number)
-      const [hoursStart,minutesStart,secondsStart] = newValue.split(':').map(Number)
+      const [hours, minutes, seconds] = newValue.split(":").map(Number);
+      const [hoursEnd, minutesEnd, secondsEnd] = endTimeInput
+        .split(":")
+        .map(Number);
+      const [hoursStart, minutesStart, secondsStart] = newValue
+        .split(":")
+        .map(Number);
 
       // Convert to microseconds
-      const microseconds = ((hours * 60 * 60) + (minutes * 60) + seconds) * 1e6;
-      const microsecondsEnd = ((hoursEnd * 60 * 60) + (minutesEnd * 60) + secondsEnd) * 1e6;
-      const microsecondsStart = ((hoursStart * 60 * 60) + (minutesStart * 60) + secondsStart) * 1e6;
+      const microseconds = (hours * 60 * 60 + minutes * 60 + seconds) * 1e6;
+      const microsecondsEnd =
+        (hoursEnd * 60 * 60 + minutesEnd * 60 + secondsEnd) * 1e6;
+      const microsecondsStart =
+        (hoursStart * 60 * 60 + minutesStart * 60 + secondsStart) * 1e6;
 
-      if(microseconds > duration){
-        setValue([100,100])
-        setEndTimeInput(microsecondsToString(duration))
+      if (microseconds > duration) {
+        setValue([100, 100]);
+        setEndTimeInput(microsecondsToString(duration));
       }
 
-      
-      if(microseconds < microsecondsStart){
-        setEndTimeInput(microsecondsToString(microsecondsStart))
+      if (microseconds < microsecondsStart) {
+        setEndTimeInput(microsecondsToString(microsecondsStart));
 
-        setValue([value[0],value[0]])
-
+        setValue([value[0], value[0]]);
+      } else {
+        setValue([value[0], (microseconds / duration) * 100]);
+        setEndTimeInput(microsecondsToString(microseconds));
       }
-
-      else{
-        
-        setValue([value[0],microseconds/duration*100])
-        setEndTimeInput(microsecondsToString(microseconds))
-      }
-     
-        
-      };
-      // Here you can handle the microseconds further as needed
-    
+    }
+    // Here you can handle the microseconds further as needed
   };
 
   const handleEndInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-   
-  setEndTimeInput(event.target.value)
-    
+    setEndTimeInput(event.target.value);
   };
 
-
-  const handleStartInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStartInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setStartTimeInput(event.target.value);
-  }
+  };
 
-  const handleTimeIntervalSet = (event: any, newValue:  number[]) => {
+  const handleTimeIntervalSet = (event: any, newValue: number[]) => {
+    setValue(newValue);
 
-    setValue(newValue)
-    
-
-  setValueText([microsecondsToString(newValue[0]*duration/100),microsecondsToString(newValue[1]*duration/100)]);
-  setStartTimeInput(microsecondsToString(newValue[0]*duration/100))
-  setEndTimeInput(microsecondsToString(newValue[1]*duration/100))
-
-   
-  }
+    setValueText([
+      microsecondsToString((newValue[0] * duration) / 100),
+      microsecondsToString((newValue[1] * duration) / 100),
+    ]);
+    setStartTimeInput(microsecondsToString((newValue[0] * duration) / 100));
+    setEndTimeInput(microsecondsToString((newValue[1] * duration) / 100));
+  };
 
   return (
     <div className={`max-w-[900px] mx-auto w-full px-10 lg:px-6`}>
-      {(!success && !uploadFile ) &&
-      <p className="mb-4 text-xl   font-semibold text-white">
-       Extract audio from a video or convert audio to audio, on your browser, for free
-      </p>
-      }
+      {!success && !uploadFile && (
+        <p className="mb-4 text-xl   font-semibold text-white">
+          Extract audio from a video or convert audio to audio, on your browser,
+          for free
+        </p>
+      )}
 
-
-
-      <div className={`mb-6 ${(!success && !uploadFile)&& "mt-8"}`} >
+      <div className={`mb-6 ${!success && !uploadFile && "mt-8"}`}>
         <div
           className={`lg:min-w-[400px] min-h-[250px] h-300 m-auto rounded-lg border-dashed ${
             isDragging
@@ -404,7 +405,7 @@ export default function Audio() {
               <div className="text-center text-gray-700 flex flex-col items-center">
                 Drag & Drop an audio or video file here
                 <br />
-{/*                 <p className="text-xs text-gray-700">MP4, MKV, WEBM</p> */}
+                {/*                 <p className="text-xs text-gray-700">MP4, MKV, WEBM</p> */}
               </div>
             )}
           </p>
@@ -419,100 +420,98 @@ export default function Audio() {
           />
         </div>
 
-<div
+        <div
           className={`${
             uploadFile || success
               ? "flex flex-col mx-auto justify-center "
               : "hidden"
           }`}
         >
-
-<div
-                      className={` ${
-                        success ? "hidden" : "flex flex-row justify-between"
-                      }`}
-                    >
-                      <p className="text-white text-xl font-semibold ">
-                        {uploadFileName.length > 0 ? uploadFileName : "Your File"}{" "}
-                        <ClearIcon
-                          onClick={() => setUploadFile(null)}
-                          fontSize="small"
-                          className="ml-4 mb-1 cursor-pointer"
-                        />
-                      </p>
-                    </div>
-
-
-         { 
-         (!success && !progress) &&
-         
-                <div onClick={() => setShowAdvancedOptions(!showAdvancedOptions)} className={`max-w-[200px] flex flex-row gap-4 my-10 cursor-pointer ${!extractionReady ? "opacity-60 pointer-events-none" : ""}`} >
-        <SettingsIcon className="text-zinc-300"/>
-        <p className="text-zinc-300 ">  Options
+          <div
+            className={` ${
+              success ? "hidden" : "flex flex-row justify-between"
+            }`}
+          >
+            <p className="text-white text-xl font-semibold ">
+              {uploadFileName.length > 0 ? uploadFileName : "Your File"}{" "}
+              <ClearIcon
+                onClick={() => setUploadFile(null)}
+                fontSize="small"
+                className="ml-4 mb-1 cursor-pointer"
+              />
             </p>
+          </div>
 
-        </div>
-}
+          {!success && !progress && (
+            <div
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              className={`max-w-[200px] flex flex-row gap-4 my-10 cursor-pointer ${
+                !extractionReady ? "opacity-60 pointer-events-none" : ""
+              }`}
+            >
+              <SettingsIcon className="text-zinc-300" />
+              <p className="text-zinc-300 "> Options</p>
+            </div>
+          )}
 
-{showAdvancedOptions && (
-  <div>
-       
-                  
+          {showAdvancedOptions && (
+            <div>
+              {success && (
+                <div className="flex flex-col items-center ">
+                  <p className="text-xl font-semibold text-white mt-6">
+                    Your file has been successfully converted!
+                  </p>
+                  <button
+                    className="mt-6  cursor-pointer text-md text-zinc-700 bg-primaryColor px-4 py-2 rounded-lg"
+                    onClick={() => setUploadFile(null)}
+                  >
+                    Convert another file
+                  </button>
+                </div>
+              )}
 
-                    {success && (
-                      <div className="flex flex-col items-center ">
-                        <p className="text-xl font-semibold text-white mt-6">
-                          Your file has been successfully converted!
-                        </p>
-                        <button
-                          className="mt-6  cursor-pointer text-md text-zinc-700 bg-primaryColor px-4 py-2 rounded-lg"
-                          onClick={() => setUploadFile(null)}
-                        >
-                          Convert another file
-                        </button>
-                      </div>
-                    )}
-         
-         
-                    <div
-                      className={`flex flex-col space-y-2 max-w-[300px] mt-6 ${
-                        (progress || success) && "hidden"
-                      }`}
-                    >
-                                  <label
-                                    htmlFor="output-format"
-                                    className="block text-sm leading-5 font-medium text-zinc-300"
-                                  >
-                                    1) Pick Output Format
-                                    <br />
-                                  </label>
-                                  <select
-                                    id="output-format"
-                                    defaultValue="mp3"
-                                    value={outputFormat || "mp3"}
-                                    onChange={onOutputFormatChange}
-                                    className={`block max-w-[200px] w-full py-1.5 px-3 border border-gray-300 bg-zinc-800 text-zinc-100 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm `}
-                                  >
-                                    {outputFormatOptions.map((option, index) => (
-                                      <option key={index} value={option} className={``}>
-                                        {
-                                        
-                                        option === originalOutputformat ? option + " (Original)" : option
-                                        
-                                        }
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <p className="text-xs leading-5 font-medium text-zinc-300">
-                                    Note: Default option automatically detects the original audio
-                                    format of the video file.
-                                  </p>
-                    </div>
+              <div
+                className={`flex flex-col space-y-2 max-w-[300px] mt-6 ${
+                  (progress || success) && "hidden"
+                }`}
+              >
+                <label
+                  htmlFor="output-format"
+                  className="block text-sm leading-5 font-medium text-zinc-300"
+                >
+                  1) Pick Output Format
+                  <br />
+                </label>
+                <select
+                  id="output-format"
+                  defaultValue="mp3"
+                  value={outputFormat || "mp3"}
+                  onChange={onOutputFormatChange}
+                  className={`block max-w-[200px] w-full py-1.5 px-3 border border-gray-300 bg-zinc-800 text-zinc-100 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm `}
+                >
+                  {outputFormatOptions.map((option, index) => (
+                    <option key={index} value={option} className={``}>
+                      {option === originalOutputformat
+                        ? option + " (Original)"
+                        : option}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs leading-5 font-medium text-zinc-300">
+                  Note: Default option automatically detects the original audio
+                  format of the video file.
+                </p>
+              </div>
 
-
-                  <div className={`max-w-[300px] mt-10 mb-10 ${(!uploadFile || success || progress ) && "hidden "}`} >
-                                              <p className="text-white text-sm mb-2">2) Slice the audio file (optional)</p>
-                                          {/*   <Slider value={value}
+              <div
+                className={`max-w-[300px] mt-10 mb-10 ${
+                  (!uploadFile || success || progress) && "hidden "
+                }`}
+              >
+                <p className="text-white text-sm mb-2">
+                  2) Slice the audio file (optional)
+                </p>
+                {/*   <Slider value={value}
                                                     className="text-zinc-300"
                                                     onChange={(event: any, newValue: number | number[]) =>
                                                     {
@@ -522,36 +521,31 @@ export default function Audio() {
                                                   
                                                     ></Slider> */}
 
-                                            <div className="flex flex-row gap-6">
-                                              <div className="flex flex-col">
-                                              <label className="text-white text-xs">Start Time</label>
-                                                    <input className="w-[100px] bg-zinc-800 text-white text-xs rounded-md border border-zinc-600 focus:outline-none px-2 py-1 mt-2"
-                                                    pattern="\d{2}:\d{2}:\d{2}"
-                                                    
-                                                    value={startTimeInput}
-                                                    onChange={handleStartInputChange}
-                                                      onBlur={handleBlurStart}
-                                                    />
-
-                                            </div>
-                                            <div className="flex flex-col">
-                                            <label className="text-white text-xs">End Time</label>
-                                                    <input className="w-[100px] bg-zinc-800 text-white text-xs rounded-md border border-zinc-600 focus:outline-none px-2 py-1 mt-2"
-                                                    pattern="\d{2}:\d{2}:\d{2}"
-                                                    
-                                                    value={endTimeInput}
-                                                      onChange={handleEndInputChange}
-                                                      onBlur={handleBlurEnd}
-                                                    />
-                                            </div>       
-                                            </div>       
-                  
-                      </div>
-
-
-</div>
-                                                  )}
-
+                <div className="flex flex-row gap-6">
+                  <div className="flex flex-col">
+                    <label className="text-white text-xs">Start Time</label>
+                    <input
+                      className="w-[100px] bg-zinc-800 text-white text-xs rounded-md border border-zinc-600 focus:outline-none px-2 py-1 mt-2"
+                      pattern="\d{2}:\d{2}:\d{2}"
+                      value={startTimeInput}
+                      onChange={handleStartInputChange}
+                      onBlur={handleBlurStart}
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-white text-xs">End Time</label>
+                    <input
+                      className="w-[100px] bg-zinc-800 text-white text-xs rounded-md border border-zinc-600 focus:outline-none px-2 py-1 mt-2"
+                      pattern="\d{2}:\d{2}:\d{2}"
+                      value={endTimeInput}
+                      onChange={handleEndInputChange}
+                      onBlur={handleBlurEnd}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <button
             onClick={extractAndDownloadAudio}
@@ -567,12 +561,9 @@ export default function Audio() {
               ? "Convert"
               : "Preparing the file..."}
           </button>
-          {
-          !progress && success &&
-          (error.length>0 && 
-          <p className="text-red-400 text-sm mt-4">
-            {error}
-            </p>)}
+          {!progress && success && error.length > 0 && (
+            <p className="text-red-400 text-sm mt-4">{error}</p>
+          )}
 
           <div className="flex flex-col">
             {progress && (
