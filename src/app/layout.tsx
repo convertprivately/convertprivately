@@ -11,20 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Convert Privately",
   description: "Conversion tool that works locally without uploading files.",
-  icons: {
-    icon: [
-      {
-        media: '(prefers-color-scheme: light)',
-        url: '/img/alphy_light.png',
-        href: '/img/alphy_light.png',
-      },
-      {
-        media: '(prefers-color-scheme: dark)',
-        url: '/img/alphy_dark.png',
-        href: '/img/alphy_dark.png',
-      },
-    ],
-  },
+  icons: '/img/icon.png',
 };
 
 export default function RootLayout({
