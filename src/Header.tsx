@@ -16,9 +16,9 @@ export function Header() {
               ConvertPrivately
             </p>
           </a>
+          
           <br />
-          <br />
-          <p className="text-md text-zinc-300">
+          <p className="text-md text-zinc-300 ml-1">
             No clouds, no servers.
             <br />
             Convert video to audio, or audio to audio, privately, in lightning speed.
