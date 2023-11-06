@@ -368,6 +368,13 @@ export default function Audio() {
     setEndTimeInput(microsecondsToString((newValue[1] * duration) / 100));
   };
 
+
+  const handleReset = () => {
+    setUploadFile(null);
+    setSuccess(false);
+    setProgress(null);
+    setError("");
+  }
   return (
     <div className={`max-w-[900px] mx-auto w-full px-10 lg:px-6`}>
       {!success && !uploadFile && (
@@ -463,7 +470,7 @@ export default function Audio() {
                   </p>
                   <button
                     className="mt-6  cursor-pointer text-md text-zinc-700 bg-primaryColor px-4 py-2 rounded-lg"
-                    onClick={() => setUploadFile(null)}
+                    onClick={handleReset}
                   >
                     Convert another file
                   </button>
@@ -561,7 +568,7 @@ export default function Audio() {
               ? "Convert"
               : "Preparing the file..."}
           </button>
-          {!progress && success && error.length > 0 && (
+          {!progress && !success && error.length > 0 && (
             <p className="text-red-400 text-sm mt-4">{error}</p>
           )}
 
