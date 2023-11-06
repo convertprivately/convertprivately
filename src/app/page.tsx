@@ -38,6 +38,7 @@ export default function Audio() {
   const [originalOutputformat, setOriginalOutputFormat] = useState<string>("");
   const [originalFileType, setOriginalFileType] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
+  const [isAudioFile, setIsAudioFile] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -105,18 +106,24 @@ export default function Audio() {
       file = e.dataTransfer.files[0];
       const fileType = getFileType(file.name);
       setOriginalFileType(fileType);
-      if (
-        fileType === "mp3" ||
-        fileType === "ogg" ||
-        fileType === "wav" ||
-        fileType === "aac" ||
-        fileType === "flac" ||
-        fileType === "m4a" ||
-        fileType === "opus" ||
-        fileType === "ac3"
-      ) {
-        setShowAdvancedOptions(true);
-      }
+      
+              if (
+                fileType === "mp3" ||
+                fileType === "ogg" ||
+                fileType === "wav" ||
+                fileType === "aac" ||
+                fileType === "flac" ||
+                fileType === "m4a" ||
+                fileType === "opus" ||
+                fileType === "ac3"
+              ) {
+                setIsAudioFile(true);
+                setShowAdvancedOptions(true);
+              }
+              else{
+                setIsAudioFile(false);
+                setShowAdvancedOptions(false);
+              }
       setUploadFile(file);
       setUploadFileName(file.name);
     } else {
@@ -151,7 +158,12 @@ export default function Audio() {
         fileType === "opus" ||
         fileType === "ac3"
       ) {
+        setIsAudioFile(true);
         setShowAdvancedOptions(true);
+      }
+      else{
+        setIsAudioFile(false);
+        setShowAdvancedOptions(false);
       }
 
       setUploadFile(file);
@@ -175,7 +187,8 @@ export default function Audio() {
 
   const extractAndDownloadAudio = async () => {
     if (extraction.current && outputFormat) {
-      if (originalOutputformat === outputFormat) {
+      console.log(originalOutputformat, outputFormat, isAudioFile)
+      if ((originalOutputformat === outputFormat) && isAudioFile) {
         setError("Please select a different output format");
         return;
       }
