@@ -13,7 +13,7 @@ export function Header() {
         <li>
           <a href="/">
             <p className="text-3xl text-white font-bold">
-              Convert Privately
+              ConvertPrivately
             </p>
           </a>
           <br />
@@ -26,6 +26,8 @@ export function Header() {
         </li>
         <li> </li>
       </ul>
+      <div className="border-b border-gray-700  mx-auto items-center flex mb-5 mt-5"></div>
+
     </nav>
   );
 }

@@ -56,7 +56,7 @@ export class FFmpegWrapper {
   }
 
   private log(type: string, message: string) {
-    console.log(type, "=>", message);
+    /* console.log(type, "=>", message); */
     this.logLines.push({ type, message });
   }
 

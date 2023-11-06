@@ -15,7 +15,7 @@ export function Explainer() {
             <h2 className="font-bold text-lg ml-4 text-white">Private</h2>
           </div>
           <p className="mt-4 text-sm text-zinc-300 ">
-            PrivateConverter handles all the process in your browser. We do not
+            ConvertPrivately handles all the process in your browser. We do not
             see or store your files. Your data stays yours.{" "}
           </p>
         </div>
@@ -43,7 +43,7 @@ export function Explainer() {
             <h2 className="font-bold text-lg ml-4 text-white">Free</h2>
           </div>
           <p className="mt-4 text-sm text-zinc-300">
-            PrivateConverter is a free tool. We don’t charge for conversions, we
+          ConvertPrivately is a free tool. We don’t charge for conversions, we
             don’t have any ads, and we intend to do neither in the foreseeable
             future.{" "}
           </p>
@@ -57,8 +57,8 @@ export function Explainer() {
             <h2 className="font-bold text-lg ml-4 text-white">Open Source</h2>
           </div>
           <p className="mt-4 text-sm text-zinc-300">
-            The software behind PrivateConverter is open source. You can check
-            the GitHub page <a className="underline cursor-pointer">here</a>.{" "}
+            The software behind ConvertPrivately is open source. You can check
+            the GitHub page <a href="https://github.com/convertprivately/convertprivately" target="_blank" className="underline cursor-pointer">here</a>.{" "}
           </p>
         </div>
       </div>
