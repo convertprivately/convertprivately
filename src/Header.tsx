@@ -1,3 +1,6 @@
+import Icon from "../public/img/icon.png"
+import Image from "next/image"
+
 export function Header() {
   return (
     <nav className="container max-w-[900px] p-10 lg:p-6 mx-auto mt-10 mb-10">
@@ -11,8 +14,9 @@ export function Header() {
         }}
       >
         <li>
-          <a href="/">
-            <p className="text-3xl text-white font-bold">
+          <a href="/" className="flex flex-row items-center">
+            <Image alt="ConvertPrivately" src={Icon} width={50} height={50} />
+            <p className="text-3xl ml-2 text-white font-bold">
               ConvertPrivately
             </p>
           </a>
