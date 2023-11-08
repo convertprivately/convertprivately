@@ -3,7 +3,7 @@ import Image from "next/image"
 
 export function Header() {
   return (
-    <nav className="container max-w-[900px] p-10 lg:p-6 mx-auto mt-10 mb-10">
+    <nav className="container max-w-[900px] p-10 lg:p-6 mx-auto mt-10 mb-5">
       <ul
         style={{
           display: "flex",
@@ -23,9 +23,9 @@ export function Header() {
           
           <br />
           <p className="text-md text-zinc-300 ml-1">
-            No clouds, no servers.
+          No clouds, no servers. 
             <br />
-            Convert video to audio, or audio to audio, privately, in lightning speed.
+            Convert your audio and video files privately, in lightning speed.
           </p>
         </li>
         <li> </li>

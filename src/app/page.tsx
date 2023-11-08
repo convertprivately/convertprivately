@@ -40,6 +40,9 @@ export default function Audio() {
   const [error, setError] = useState<string>("");
   const [isAudioFile, setIsAudioFile] = useState<boolean>(false);
 
+
+
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const f = async () => {
@@ -48,7 +51,7 @@ export default function Audio() {
       console.log("FFmpeg loaded");
       const formats = await ffmpeg.current!.supportedFormats();
       supportedFormats.current = formats;
-      /* console.log("FORMATS: ", formats); */
+      console.log("FORMATS: ", formats); 
     };
     f();
   }, []);
@@ -65,14 +68,24 @@ export default function Audio() {
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       // This can be used to set the output format in the select box as well.
       const metadata = await extraction.current.audioMetadata();
+      if(!isAudioFile){
+      
+        const format = metadata.format.replace(/,$/, '');
+        
+        setOriginalOutputFormat(format);
+        setOutputFormat(format);
+        
+      }
+      else{
+        setOutputFormat("mp3");
+      }
       setDuration(metadata.duration);
       setStartTimeInput("00:00:00");
       setEndTimeInput(microsecondsToString(metadata.duration));
 
-      setOutputFormat(metadata.format);
-      setOriginalOutputFormat(metadata.format);
+      
+
       setExtractionReady(true);
-      console.log("Default output format:", metadata.format);
       console.log("Audio duration: " + microsecondsToString(metadata.duration));
 
       console.log("Extraction created");
@@ -95,6 +108,7 @@ export default function Audio() {
     return fileType;
   }
 
+  
   const handleFileUploadThroughDrop = async (
     e: React.DragEvent<HTMLDivElement>
   ) => {
@@ -147,7 +161,11 @@ export default function Audio() {
 
       file = e.target.files[0];
       const fileType = getFileType(file.name);
-      setOriginalFileType(fileType);
+      
+      
+          setOriginalFileType(fileType)
+      
+      
       if (
         fileType === "mp3" ||
         fileType === "ogg" ||
@@ -187,13 +205,15 @@ export default function Audio() {
 
   const extractAndDownloadAudio = async () => {
     if (extraction.current && outputFormat) {
-      console.log(originalOutputformat, outputFormat, isAudioFile)
+     
       if ((originalOutputformat === outputFormat) && isAudioFile) {
+        
         setError("Please select a different output format");
         return;
       }
       setError("");
       setProgress({ progress: 0, microseconds: 0 });
+      
       const namedPayload = await extraction.current.extractAudio({
         format: outputFormat,
         start: (duration * value[0]) / 100,
@@ -370,6 +390,8 @@ export default function Audio() {
     setStartTimeInput(event.target.value);
   };
 
+
+/* 
   const handleTimeIntervalSet = (event: any, newValue: number[]) => {
     setValue(newValue);
 
@@ -379,7 +401,7 @@ export default function Audio() {
     ]);
     setStartTimeInput(microsecondsToString((newValue[0] * duration) / 100));
     setEndTimeInput(microsecondsToString((newValue[1] * duration) / 100));
-  };
+  }; */
 
 
   const handleReset = () => {
@@ -391,10 +413,20 @@ export default function Audio() {
   return (
     <div className={`max-w-[900px] mx-auto w-full px-10 lg:px-6`}>
       {!success && !uploadFile && (
-        <p className="mb-4 text-xl   font-semibold text-white">
-          Extract audio from a video or convert audio to audio, on your browser,
-          for free
+        <div>
+       <div className="flex flex-row gap-6 ">
+        <p className="mb-4 text-2xl   font-semibold text-white">
+        <span className="text-blue-300  text-3xl">AUDIO</span> AND <span className="text-blue-300  text-3xl">VIDEO</span> CONVERTER
         </p>
+{/*         <p className="mb-4 text-2xl   font-semibold text-white">
+        VIDEO to AUDIO
+        </p> */}
+        </div>
+        <p className="mb-4 text-md   text-white">
+        Convert VIDEO ={`>`} AUDIO and AUDIO ={`>`} AUDIO on your browser,
+          for free.
+        </p>
+        </div>
       )}
 
       <div className={`mb-6 ${!success && !uploadFile && "mt-8"}`}>
@@ -423,7 +455,7 @@ export default function Audio() {
               "Release to Drop"
             ) : (
               <div className="text-center text-gray-700 flex flex-col items-center">
-                Drag & Drop an audio or video file here
+                Drag & Drop an AUDIO or VIDEO file here
                 <br />
                 {/*                 <p className="text-xs text-gray-700">MP4, MKV, WEBM</p> */}
               </div>

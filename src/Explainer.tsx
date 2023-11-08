@@ -15,7 +15,7 @@ export function Explainer() {
             <h2 className="font-bold text-lg ml-4 text-white">Private</h2>
           </div>
           <p className="mt-4 text-sm text-zinc-300 ">
-            ConvertPrivately handles all the process in your browser. We do not
+            ConvertPrivately uses FFMPEG to handle all the process in your browser. We do not
             see or store your files. Your data stays yours.{" "}
           </p>
         </div>
@@ -43,7 +43,7 @@ export function Explainer() {
             <h2 className="font-bold text-lg ml-4 text-white">Free</h2>
           </div>
           <p className="mt-4 text-sm text-zinc-300">
-          ConvertPrivately is a free tool. We don’t charge for conversions, we
+          ConvertPrivately is a free tool. We don’t charge for conversions and we
             don’t have any ads, and we intend to do neither in the foreseeable
             future.{" "}
           </p>
