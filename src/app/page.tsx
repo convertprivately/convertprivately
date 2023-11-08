@@ -56,6 +56,8 @@ export default function Audio() {
     f();
   }, []);
 
+  
+
   useEffect(() => {
     if (!ffmpegLoaded) return;
     if (!uploadFile) return;
@@ -68,6 +70,8 @@ export default function Audio() {
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       // This can be used to set the output format in the select box as well.
       const metadata = await extraction.current.audioMetadata();
+      console.log(metadata)
+      
       if(!isAudioFile){
       
         const format = metadata.format.replace(/,$/, '');
@@ -78,14 +82,16 @@ export default function Audio() {
       }
       else{
         setOutputFormat("mp3");
+        
       }
       setDuration(metadata.duration);
       setStartTimeInput("00:00:00");
       setEndTimeInput(microsecondsToString(metadata.duration));
 
       
-
+      
       setExtractionReady(true);
+
       console.log("Audio duration: " + microsecondsToString(metadata.duration));
 
       console.log("Extraction created");
@@ -192,6 +198,7 @@ export default function Audio() {
       setUploadFileName("");
       if (extraction.current) {
         await extraction.current.delete();
+        
         extraction.current = null;
         setExtractionReady(false);
       }
