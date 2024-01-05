@@ -51,12 +51,12 @@ export default function Audio() {
       console.log("FFmpeg loaded");
       const formats = await ffmpeg.current!.supportedFormats();
       supportedFormats.current = formats;
-      console.log("FORMATS: ", formats); 
+      console.log("FORMATS: ", formats);
     };
     f();
   }, []);
 
-  
+
 
   useEffect(() => {
     if (!ffmpegLoaded) return;
@@ -70,26 +70,25 @@ export default function Audio() {
       extraction.current = await Extraction.create(ffmpeg.current!, uploadFile);
       // This can be used to set the output format in the select box as well.
       const metadata = await extraction.current.audioMetadata();
-      console.log(metadata)
-      
-      if(!isAudioFile){
-      
+
+      if (!isAudioFile) {
+
         const format = metadata.format.replace(/,$/, '');
-        
+
         setOriginalOutputFormat(format);
         setOutputFormat(format);
-        
+
       }
-      else{
+      else {
         setOutputFormat("mp3");
-        
+
       }
       setDuration(metadata.duration);
       setStartTimeInput("00:00:00");
       setEndTimeInput(microsecondsToString(metadata.duration));
 
-      
-      
+
+
       setExtractionReady(true);
 
       console.log("Audio duration: " + microsecondsToString(metadata.duration));
@@ -114,7 +113,7 @@ export default function Audio() {
     return fileType;
   }
 
-  
+
   const handleFileUploadThroughDrop = async (
     e: React.DragEvent<HTMLDivElement>
   ) => {
@@ -126,24 +125,24 @@ export default function Audio() {
       file = e.dataTransfer.files[0];
       const fileType = getFileType(file.name);
       setOriginalFileType(fileType);
-      
-              if (
-                fileType === "mp3" ||
-                fileType === "ogg" ||
-                fileType === "wav" ||
-                fileType === "aac" ||
-                fileType === "flac" ||
-                fileType === "m4a" ||
-                fileType === "opus" ||
-                fileType === "ac3"
-              ) {
-                setIsAudioFile(true);
-                setShowAdvancedOptions(true);
-              }
-              else{
-                setIsAudioFile(false);
-                setShowAdvancedOptions(false);
-              }
+
+      if (
+        fileType === "mp3" ||
+        fileType === "ogg" ||
+        fileType === "wav" ||
+        fileType === "aac" ||
+        fileType === "flac" ||
+        fileType === "m4a" ||
+        fileType === "opus" ||
+        fileType === "ac3"
+      ) {
+        setIsAudioFile(true);
+        setShowAdvancedOptions(true);
+      }
+      else {
+        setIsAudioFile(false);
+        setShowAdvancedOptions(false);
+      }
       setUploadFile(file);
       setUploadFileName(file.name);
     } else {
@@ -167,11 +166,11 @@ export default function Audio() {
 
       file = e.target.files[0];
       const fileType = getFileType(file.name);
-      
-      
-          setOriginalFileType(fileType)
-      
-      
+
+
+      setOriginalFileType(fileType)
+
+
       if (
         fileType === "mp3" ||
         fileType === "ogg" ||
@@ -185,7 +184,7 @@ export default function Audio() {
         setIsAudioFile(true);
         setShowAdvancedOptions(true);
       }
-      else{
+      else {
         setIsAudioFile(false);
         setShowAdvancedOptions(false);
       }
@@ -198,7 +197,7 @@ export default function Audio() {
       setUploadFileName("");
       if (extraction.current) {
         await extraction.current.delete();
-        
+
         extraction.current = null;
         setExtractionReady(false);
       }
@@ -212,15 +211,15 @@ export default function Audio() {
 
   const extractAndDownloadAudio = async () => {
     if (extraction.current && outputFormat) {
-     
+
       if ((originalOutputformat === outputFormat) && isAudioFile) {
-        
+
         setError("Please select a different output format");
         return;
       }
       setError("");
       setProgress({ progress: 0, microseconds: 0 });
-      
+
       const namedPayload = await extraction.current.extractAudio({
         format: outputFormat,
         start: (duration * value[0]) / 100,
@@ -398,17 +397,17 @@ export default function Audio() {
   };
 
 
-/* 
-  const handleTimeIntervalSet = (event: any, newValue: number[]) => {
-    setValue(newValue);
-
-    setValueText([
-      microsecondsToString((newValue[0] * duration) / 100),
-      microsecondsToString((newValue[1] * duration) / 100),
-    ]);
-    setStartTimeInput(microsecondsToString((newValue[0] * duration) / 100));
-    setEndTimeInput(microsecondsToString((newValue[1] * duration) / 100));
-  }; */
+  /* 
+    const handleTimeIntervalSet = (event: any, newValue: number[]) => {
+      setValue(newValue);
+  
+      setValueText([
+        microsecondsToString((newValue[0] * duration) / 100),
+        microsecondsToString((newValue[1] * duration) / 100),
+      ]);
+      setStartTimeInput(microsecondsToString((newValue[0] * duration) / 100));
+      setEndTimeInput(microsecondsToString((newValue[1] * duration) / 100));
+    }; */
 
 
   const handleReset = () => {
@@ -421,32 +420,30 @@ export default function Audio() {
     <div className={`max-w-[900px] mx-auto w-full px-10 lg:px-6`}>
       {!success && !uploadFile && (
         <div>
-       <div className="flex flex-row gap-6 ">
-        <p className="mb-4 text-2xl   font-semibold text-white">
-        <span className="text-blue-300  text-3xl">AUDIO</span> AND <span className="text-blue-300  text-3xl">VIDEO</span> CONVERTER
-        </p>
-{/*         <p className="mb-4 text-2xl   font-semibold text-white">
+          <div className="flex flex-row gap-6 ">
+            <p className="mb-4 text-2xl   font-semibold text-white">
+              <span className="text-blue-300  text-3xl">AUDIO</span> AND <span className="text-blue-300  text-3xl">VIDEO</span> CONVERTER
+            </p>
+            {/*         <p className="mb-4 text-2xl   font-semibold text-white">
         VIDEO to AUDIO
         </p> */}
-        </div>
-        <p className="mb-4 text-md   text-white">
-        Convert VIDEO ={`>`} AUDIO and AUDIO ={`>`} AUDIO on your browser,
-          for free.
-        </p>
+          </div>
+          <p className="mb-4 text-md   text-white">
+            Convert VIDEO ={`>`} AUDIO and AUDIO ={`>`} AUDIO on your browser,
+            for free.
+          </p>
         </div>
       )}
 
       <div className={`mb-6 ${!success && !uploadFile && "mt-8"}`}>
         <div
-          className={`lg:min-w-[400px] min-h-[250px] h-300 m-auto rounded-lg border-dashed ${
-            isDragging
-              ? "border-2 border-blue-200"
-              : "border-[2px] border-blue-800"
-          } ${
-            uploadFile === null
+          className={`lg:min-w-[400px] min-h-[250px] h-300 m-auto rounded-lg border-dashed ${isDragging
+            ? "border-2 border-blue-200"
+            : "border-[2px] border-blue-800"
+            } ${uploadFile === null
               ? "flex justify-center items-center cursor-pointer"
               : "hidden"
-          } ${isDragging ? "" : "bg-blue-200 opacity-80"} text-black`}
+            } ${isDragging ? "" : "bg-blue-200 opacity-80"} text-black`}
           onDragOver={dragOverHandler}
           onDragEnter={dragEnterHandler}
           onDragLeave={dragLeaveHandler}
@@ -480,16 +477,14 @@ export default function Audio() {
         </div>
 
         <div
-          className={`${
-            uploadFile || success
-              ? "flex flex-col mx-auto justify-center "
-              : "hidden"
-          }`}
+          className={`${uploadFile || success
+            ? "flex flex-col mx-auto justify-center "
+            : "hidden"
+            }`}
         >
           <div
-            className={` ${
-              success ? "hidden" : "flex flex-row justify-between"
-            }`}
+            className={` ${success ? "hidden" : "flex flex-row justify-between"
+              }`}
           >
             <p className="text-white text-xl font-semibold ">
               {uploadFileName.length > 0 ? uploadFileName : "Your File"}{" "}
@@ -504,9 +499,8 @@ export default function Audio() {
           {!success && !progress && (
             <div
               onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-              className={`max-w-[200px] flex flex-row gap-4 my-10 cursor-pointer ${
-                !extractionReady ? "opacity-60 pointer-events-none" : ""
-              }`}
+              className={`max-w-[200px] flex flex-row gap-4 my-10 cursor-pointer ${!extractionReady ? "opacity-60 pointer-events-none" : ""
+                }`}
             >
               <SettingsIcon className="text-zinc-300" />
               <p className="text-zinc-300 "> Options</p>
@@ -530,9 +524,9 @@ export default function Audio() {
               )}
 
               <div
-                className={`flex flex-col space-y-2 max-w-[300px] mt-6 ${
-                  (progress || success) && "hidden"
-                }`}
+                className={`flex flex-col space-y-2 max-w-[300px] mt-6 
+                ${(progress || success || isAudioFile === false) && "hidden"
+                  }`}
               >
                 <label
                   htmlFor="output-format"
@@ -563,9 +557,8 @@ export default function Audio() {
               </div>
 
               <div
-                className={`max-w-[300px] mt-10 mb-10 ${
-                  (!uploadFile || success || progress) && "hidden "
-                }`}
+                className={`max-w-[300px] mt-10 mb-10 ${(!uploadFile || success || progress) && "hidden "
+                  }`}
               >
                 <p className="text-white text-sm mb-2">
                   2) Slice the audio file (optional)
@@ -610,15 +603,14 @@ export default function Audio() {
             onClick={extractAndDownloadAudio}
             aria-busy={progress !== null}
             disabled={!extractionReady}
-            className={`bg-blue-200 max-w-[300px] text-black p-2 rounded mt-6 ${
-              (progress || success) && "hidden"
-            }`}
+            className={`bg-blue-200 max-w-[300px] text-black p-2 rounded mt-6 ${(progress || success) && "hidden"
+              }`}
           >
             {progress
               ? "Converting"
               : extractionReady
-              ? "Convert"
-              : "Preparing the file..."}
+                ? "Convert"
+                : "Preparing the file..."}
           </button>
           {!progress && !success && error.length > 0 && (
             <p className="text-red-400 text-sm mt-4">{error}</p>
