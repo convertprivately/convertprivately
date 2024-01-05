@@ -50,7 +50,7 @@ export default function Alphy({ name }: AlphyProps) {
 
   return (
     <div className="flex flex-col items-center mt-20">
-      <p className="mt-5 mb-10 text-xl font-bold text-white">
+      <p className="mt-5 mb-10 text-xl font-bold text-white ">
         Use{" "}
         <a
           className="underline text-green-200"
@@ -60,12 +60,12 @@ export default function Alphy({ name }: AlphyProps) {
           Alphy’s AI
         </a>{" "}
         on{" "}
-        <span className="underline">
+        <span className="underline break-all">
           {name.length > 0 ? name : "your audio file"}
         </span>{" "}
       </p>
 
-      <div className="flex flex-col lg:flex-row ">
+      <div className="flex  flex-row ">
         <button
           onClick={scrollBackward}
           type="button"
@@ -86,9 +86,8 @@ export default function Alphy({ name }: AlphyProps) {
                 width={1600}
                 height={900}
                 alt={image.alt}
-                className={`${
-                  index === slideIndex ? "flex" : "hidden"
-                }  overflow-x-hidden border `}
+                className={`${index === slideIndex ? "flex" : "hidden"
+                  }  overflow-x-hidden border `}
                 src={image.url}
                 priority // preload
               />
